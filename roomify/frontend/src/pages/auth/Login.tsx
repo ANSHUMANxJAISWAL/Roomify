@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react'
-import { useAuth } from '../../hooks/useAuth'
+import { useAuth, AuthContextType } from '../../hooks/useAuth'
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('')
@@ -10,7 +10,7 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   
-  const { login } = useAuth()
+  const { login } = useAuth() as AuthContextType
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -22,7 +22,7 @@ const Login: React.FC = () => {
 
     setLoading(true)
     try {
-      const success = await login(email, password, rememberMe)
+      const success = await login(email, password)
       if (success) {
         navigate('/dashboard')
       }

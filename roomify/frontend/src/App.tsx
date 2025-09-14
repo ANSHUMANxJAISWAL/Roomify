@@ -17,8 +17,17 @@ import Settings from './pages/Settings'
 import Onboarding from './pages/Onboarding'
 import LoadingScreen from './components/ui/LoadingScreen'
 
+interface AuthState {
+  user: any; // Replace 'any' with your User type if available
+  loading: boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  register: (userData: any) => Promise<boolean>; // Replace 'any' with your UserData type
+  logout: () => Promise<void>;
+  // Add other methods you use from useAuth
+}
+
 function AppRoutes() {
-  const { user, loading } = useAuth()
+  const { user, loading } = useAuth() as AuthState;
 
   if (loading) {
     return <LoadingScreen />
@@ -39,8 +48,8 @@ function AppRoutes() {
 
   return (
     <DashboardProvider>
-      <Layout>
-        <Routes>
+      <Routes>
+        <Route element={<Layout />}>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/expenses" element={<Expenses />} />
@@ -51,8 +60,8 @@ function AppRoutes() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-      </Layout>
+        </Route>
+      </Routes>
     </DashboardProvider>
   )
 }

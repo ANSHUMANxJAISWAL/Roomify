@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { User, Mail, Phone, MapPin, Calendar, Edit, Save, X, Camera, Shield, Bell, Palette, Globe } from 'lucide-react'
-import { useAuth } from '../hooks/useAuth'
+import { User as UserIcon, Mail, Phone, MapPin, Calendar, Edit, Save, X, Camera, Shield, Bell, Palette, Globe } from 'lucide-react'
+import { useAuth, AuthContextType } from '../hooks/useAuth'
 import { useDashboard } from '../contexts/DashboardContext'
 import { formatDate } from '../utils/formatters'
+import { User } from '../types'
+import toast from 'react-hot-toast'
 
 interface UserProfile {
   id: string
@@ -33,23 +35,43 @@ interface UserProfile {
 }
 
 const Profile: React.FC = () => {
-  const { user, updateProfile } = useAuth()
+  const { user, updateProfile } = useAuth() as AuthContextType
   const { loading } = useDashboard()
   const [isEditing, setIsEditing] = useState(false)
   const [activeTab, setActiveTab] = useState<'profile' | 'preferences' | 'security'>('profile')
 
+  // Create a safe user object with default values
+  const safeUser = user ? {
+    id: user.id || '',
+    username: user.username || '',
+    email: user.email || '',
+    firstName: user.firstName || '',
+    lastName: user.lastName || '',
+    avatar: user.avatar || '',
+    phone: user.phone || '',
+    bio: user.bio || '',
+    dateOfBirth: user.dateOfBirth || '',
+    roles: user.roles || [],
+    status: user.status || 'ACTIVE',
+    emailVerified: user.emailVerified || false,
+    phoneVerified: user.phoneVerified || false,
+    lastLoginAt: user.lastLoginAt || '',
+    createdAt: user.createdAt || '',
+    updatedAt: user.updatedAt || ''
+  } : null;
+
   const [profileData, setProfileData] = useState<UserProfile>({
-    id: user?.id || '',
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    email: user?.email || '',
+    id: '',
+    firstName: '',
+    lastName: '',
+    email: '',
     phone: '',
     avatar: '',
     bio: '',
     dateOfBirth: '',
     location: '',
     preferences: {
-      theme: 'system',
+      theme: 'light',
       language: 'en',
       notifications: {
         email: true,
@@ -62,33 +84,38 @@ const Profile: React.FC = () => {
         contactVisible: false
       }
     },
-    createdAt: user?.createdAt || '',
-    lastLogin: user?.lastLogin || ''
+    createdAt: '',
+    lastLogin: ''
   })
 
   const [tempProfileData, setTempProfileData] = useState<UserProfile>(profileData)
 
   useEffect(() => {
-    if (user) {
-      setProfileData({
-        ...profileData,
-        ...user
-      })
-      setTempProfileData({
-        ...profileData,
-        ...user
-      })
+    if (safeUser) {
+      setProfileData(prev => ({
+        ...prev,
+        ...safeUser,
+        lastLogin: safeUser.lastLoginAt || ''
+      }));
+      setTempProfileData(prev => ({
+        ...prev,
+        ...safeUser,
+        lastLogin: safeUser.lastLoginAt || ''
+      }));
     }
-  }, [user])
+  }, [safeUser])
 
   const handleSave = async () => {
     try {
-      // TODO: Implement profile update API call
-      await updateProfile(tempProfileData)
-      setProfileData(tempProfileData)
-      setIsEditing(false)
+      // Extract only the fields that should be sent to the updateProfile API
+      const { preferences, lastLogin, ...profileUpdate } = tempProfileData;
+      await updateProfile(profileUpdate);
+      setProfileData(tempProfileData);
+      setIsEditing(false);
+      toast.success('Profile updated successfully!');
     } catch (error) {
-      console.error('Failed to update profile:', error)
+      console.error('Failed to update profile:', error);
+      toast.error('Failed to update profile. Please try again.');
     }
   }
 
@@ -105,16 +132,25 @@ const Profile: React.FC = () => {
   }
 
   const handlePreferenceChange = (category: string, field: string, value: any) => {
-    setTempProfileData(prev => ({
-      ...prev,
-      preferences: {
-        ...prev.preferences,
-        [category]: {
-          ...prev.preferences[category as keyof typeof prev.preferences],
-          [field]: value
+    setTempProfileData(prev => {
+      const preferences = prev.preferences || {
+        theme: 'light',
+        language: 'en',
+        notifications: { email: true, push: true, sms: false },
+        privacy: { profileVisible: true, activityVisible: true, contactVisible: false }
+      };
+      
+      return {
+        ...prev,
+        preferences: {
+          ...preferences,
+          [category]: {
+            ...(preferences[category as keyof typeof preferences] as Record<string, any>),
+            [field]: value
+          }
         }
-      }
-    }))
+      };
+    });
   }
 
   const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -229,7 +265,7 @@ const Profile: React.FC = () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <User className="h-12 w-12 text-primary-600" />
+                    <UserIcon className="h-12 w-12 text-primary-600" />
                   )}
                 </div>
                 {isEditing && (
@@ -481,7 +517,7 @@ const Profile: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <User className="h-5 w-5 text-gray-400 mr-3" />
+                  <UserIcon className="h-5 w-5 text-gray-400 mr-3" />
                   <span className="text-gray-700">Profile Visible to Others</span>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">

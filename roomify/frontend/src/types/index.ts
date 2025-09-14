@@ -1,20 +1,21 @@
 // User related types
 export interface User {
-  id: string
-  username: string
-  email: string
-  firstName: string
-  lastName: string
-  avatar?: string
-  phone?: string
-  dateOfBirth?: string
-  roles: UserRole[]
-  status: UserStatus
-  emailVerified: boolean
-  phoneVerified: boolean
-  lastLoginAt?: string
-  createdAt: string
-  updatedAt: string
+  id: string;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  avatar?: string;
+  phone?: string;
+  bio?: string;
+  dateOfBirth?: string;
+  roles: UserRole[];
+  status: UserStatus;
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  lastLoginAt?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export enum UserRole {
@@ -45,6 +46,7 @@ export interface Household {
   createdAt: string
   updatedAt: string
   members: HouseholdMember[]
+  rules?: string[]
 }
 
 export interface Address {
@@ -184,24 +186,25 @@ export enum ChoreFrequency {
 
 // Reminder related types
 export interface Reminder {
-  id: string
-  title: string
-  description?: string
-  type: ReminderType
-  dueDate: string
-  priority: ReminderPriority
-  status: ReminderStatus
-  assignedTo: User
-  amount?: number
-  category?: ExpenseCategory
-  recurrence?: ReminderRecurrence
-  tone: ReminderTone
-  isAI: boolean
-  user: User
-  household?: Household
-  tags: string[]
-  createdAt: string
-  updatedAt: string
+  id: string;
+  title: string;
+  description?: string;
+  type: ReminderType;
+  dueDate: string;
+  dueTime?: string;
+  priority: ReminderPriority;
+  status: ReminderStatus;
+  assignedTo: User;
+  amount?: number;
+  category?: ExpenseCategory;
+  recurrence?: ReminderRecurrence;
+  tone: ReminderTone;
+  isAI: boolean;
+  user: User;
+  household?: Household;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export enum ReminderType {

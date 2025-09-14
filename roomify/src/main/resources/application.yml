@@ -5,8 +5,8 @@ spring:
     name: roomify-backend
   datasource:
     url: jdbc:postgresql://localhost:5432/roomify
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:password}
+    username: postgres
+    password: 123456
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -22,7 +22,7 @@ spring:
         order_updates: true
   security:
     jwt:
-      secret: ${JWT_SECRET}
+      secret: ${JWT_SECRET:roomify-secure-secret-key-change-this-in-production}
       access-token-validity: 900000 # 15 minutes
       refresh-token-validity: 604800000 # 7 days
   mail:

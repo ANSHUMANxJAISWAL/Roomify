@@ -4,6 +4,16 @@
 
 RoomiFy is a comprehensive household management application that helps roommates organize chores, track expenses, manage reminders, and stay connected. Built with modern technologies and best practices.
 
+## 📋 Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- **Java 17** or later
+- **Node.js** (v18 or later) and **npm** (v9 or later)
+- **PostgreSQL** (v14 or later)
+- **Maven** (v3.8 or later)
+- **Git** (for cloning the repository)
+
 ## 🎯 **What This Application Does**
 
 - **👥 User Management**: Secure registration, login, and profile management
@@ -16,29 +26,47 @@ RoomiFy is a comprehensive household management application that helps roommates
 
 ## 🚀 **Quick Start - Ready to Run!**
 
-### **Option 1: Docker Compose (Recommended)**
-```bash
-# On Windows
-start.bat
+### **Setup Instructions**
 
-# On Mac/Linux
-chmod +x start.sh
-./start.sh
-```
+#### 1. Database Setup
+1. Make sure PostgreSQL is running on your machine
+2. Create a new database named `roomify`:
+   ```sql
+   CREATE DATABASE roomify;
+   ```
+3. Update the database credentials in `src/main/resources/application.yml` if needed (defaults are already set):
+   ```yaml
+   spring:
+     datasource:
+       url: jdbc:postgresql://localhost:5432/roomify
+       username: postgres
+       password: 123456
+   ```
 
-### **Option 2: Manual Setup**
-```bash
-# 1. Start PostgreSQL and create database 'roomify'
-# 2. Update database credentials in application.yml
+#### 2. Backend Setup
+1. Open a terminal in the project root directory
+2. Build and run the Spring Boot application:
+   ```bash
+   # Install dependencies and build the project
+   mvn clean install
+   
+   # Run the application
+   mvn spring-boot:run
+   ```
+3. The backend should now be running at `http://localhost:8080`
 
-# 3. Start Backend
-mvn spring-boot:run
-
-# 4. Start Frontend (in new terminal)
-cd frontend
-npm install
-npm run dev
-```
+#### 3. Frontend Setup
+1. Open a new terminal in the project root directory
+2. Navigate to the frontend directory and install dependencies:
+   ```bash
+   cd frontend
+   npm install
+   ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+4. The frontend should now be running at `http://localhost:3000`
 
 ### **Option 3: Test Mode (Quick Verification)**
 ```bash
@@ -50,11 +78,58 @@ test-app.bat
 
 ## 🌐 **Access Points**
 
-- **Frontend**: http://localhost:3000
+Once everything is running, you can access:
+- **Frontend Application**: http://localhost:3000
 - **Backend API**: http://localhost:8080/api
-- **Test Endpoint**: http://localhost:8080/test/health
-- **API Documentation**: http://localhost:8080/api/swagger-ui.html
-- **Database**: localhost:5432
+- **API Documentation (Swagger UI)**: http://localhost:8080/api/swagger-ui.html
+- **Database Admin** (if using pgAdmin): http://localhost:5050
+
+## 🔍 **Verifying the Setup**
+
+1. **Backend Health Check**: 
+   - Visit: http://localhost:8080/test/health
+   - Should return: `{"status":"UP"}`
+
+2. **Database Connection**:
+   - The application will automatically create the necessary tables on first run
+   - Check the console logs for any database connection errors
+
+3. **Frontend**:
+   - Open http://localhost:3000 in your browser
+   - You should see the RoomiFy login page
+
+## 🔑 **Default Test Users**
+
+You can use these pre-configured accounts to log in:
+
+| Email             | Password   | Role   |
+|-------------------|------------|--------|
+| admin@roomify.com | admin123   | ADMIN  |
+| john@example.com  | password123| USER   |
+| jane@example.com  | password123| USER   |
+
+## 🛠️ **Troubleshooting**
+
+### Common Issues
+
+1. **Database Connection Failed**
+   - Ensure PostgreSQL is running
+   - Verify the database credentials in `application.yml`
+   - Check if the `roomify` database exists
+
+2. **Port Already in Use**
+   - If port 8080 or 3000 is in use, you can change them in:
+     - Backend: `src/main/resources/application.yml` (server.port)
+     - Frontend: `frontend/vite.config.ts` (server.port)
+
+3. **Frontend Not Connecting to Backend**
+   - Check if the backend is running
+   - Verify the API URL in `frontend/src/config/api.ts`
+   - Look for CORS errors in the browser console
+
+4. **Missing Dependencies**
+   - For backend: Run `mvn clean install`
+   - For frontend: Run `npm install` in the frontend directory
 
 ## 🔑 **Test Users (Pre-configured)**
 

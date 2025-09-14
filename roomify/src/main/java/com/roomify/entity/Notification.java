@@ -53,6 +53,10 @@ public class Notification {
     @Column(name = "data")
     private String data; // JSON string for additional data
     
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private NotificationStatus status = NotificationStatus.UNREAD;
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -98,6 +102,9 @@ public class Notification {
     
     public LocalDateTime getReadAt() { return readAt; }
     public void setReadAt(LocalDateTime readAt) { this.readAt = readAt; }
+    
+    public NotificationStatus getStatus() { return status; }
+    public void setStatus(NotificationStatus status) { this.status = status; }
     
     public String getActionUrl() { return actionUrl; }
     public void setActionUrl(String actionUrl) { this.actionUrl = actionUrl; }

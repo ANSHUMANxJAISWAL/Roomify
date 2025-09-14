@@ -11,13 +11,14 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { useDashboard } from '../../contexts/DashboardContext'
+import { AuthContextType } from '../../contexts/AuthContext'
 
 interface HeaderProps {
   onMenuClick: () => void
 }
 
 const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
-  const { user, logout } = useAuth()
+  const { user, logout } = useAuth() as AuthContextType
   const { notifications } = useDashboard()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)

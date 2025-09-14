@@ -95,7 +95,7 @@ public class User implements UserDetails {
     @JoinColumn(name = "household_id")
     private Household household;
     
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "paidBy", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Expense> expenses = new HashSet<>();
     
     @OneToMany(mappedBy = "assignedTo", cascade = CascadeType.ALL, orphanRemoval = true)

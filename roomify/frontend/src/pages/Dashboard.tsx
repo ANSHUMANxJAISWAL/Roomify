@@ -11,11 +11,11 @@ import {
   Calendar,
   AlertTriangle
 } from 'lucide-react'
-import { useDashboard } from '../contexts/DashboardContext'
+import { useDashboard, DashboardContextType } from '../contexts/DashboardContext'
 import { formatCurrency } from '../utils/formatters'
 
 const Dashboard: React.FC = () => {
-  const { stats, expenses, chores, reminders, households, loading } = useDashboard()
+  const { stats, expenses, chores, reminders, households, loading } = useDashboard() as DashboardContextType
 
   if (loading) {
     return (

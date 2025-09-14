@@ -3,25 +3,15 @@ import { Plus, Edit, Trash2, Bell, Clock, AlertTriangle, CheckCircle, Calendar, 
 import { useAuth } from '../hooks/useAuth'
 import { useDashboard } from '../contexts/DashboardContext'
 import { formatDate, formatTime } from '../utils/formatters'
+import { Reminder as ReminderType, ReminderStatus, ReminderPriority } from '../types'
 
-interface Reminder {
-  id: string
-  title: string
-  description: string
-  dueDate: string
-  dueTime: string
-  priority: 'LOW' | 'MEDIUM' | 'HIGH'
-  status: 'PENDING' | 'COMPLETED' | 'OVERDUE'
-  type: 'TASK' | 'BILL' | 'EVENT' | 'GENERAL'
-  assignedTo: string
-  createdAt: string
-}
+// Using imported ReminderType from types.ts
 
 const Reminders: React.FC = () => {
   const { user } = useAuth()
   const { reminders, loading } = useDashboard()
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [editingReminder, setEditingReminder] = useState<Reminder | null>(null)
+  const [editingReminder, setEditingReminder] = useState<ReminderType | null>(null)
   const [filterStatus, setFilterStatus] = useState<string>('ALL')
   const [filterPriority, setFilterPriority] = useState<string>('ALL')
   const [filterType, setFilterType] = useState<string>('ALL')
@@ -65,12 +55,12 @@ const Reminders: React.FC = () => {
     // TODO: Implement status update API call
   }
 
-  const filteredReminders = reminders?.filter(reminder => {
-    if (filterStatus !== 'ALL' && reminder.status !== filterStatus) return false
-    if (filterPriority !== 'ALL' && reminder.priority !== filterPriority) return false
-    if (filterType !== 'ALL' && reminder.type !== filterType) return false
-    return true
-  }) || []
+  const filteredReminders = reminders.filter(reminder => {
+    const matchesStatus = filterStatus === 'ALL' || reminder.status === filterStatus
+    const matchesPriority = filterPriority === 'ALL' || reminder.priority === filterPriority
+    const matchesType = filterType === 'ALL' || reminder.type === filterType
+    return matchesStatus && matchesPriority && matchesType
+  }) as ReminderType[] || []
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -109,21 +99,31 @@ const Reminders: React.FC = () => {
     }
   }
 
-  const isOverdue = (dueDate: string, dueTime: string) => {
+  const isOverdue = (dueDate: string, dueTime?: string) => {
     const now = new Date()
-    const due = new Date(`${dueDate}T${dueTime}`)
+    const dateTimeString = dueTime ? `${dueDate}T${dueTime}` : dueDate
+    const due = new Date(dateTimeString)
     return now > due
   }
 
   const sortedReminders = [...filteredReminders].sort((a, b) => {
-    const aDate = new Date(`${a.dueDate}T${a.dueTime}`)
-    const bDate = new Date(`${b.dueDate}T${b.dueTime}`)
+    const aDate = a.dueTime ? new Date(`${a.dueDate}T${a.dueTime}`) : new Date(a.dueDate)
+    const bDate = b.dueTime ? new Date(`${b.dueDate}T${b.dueTime}`) : new Date(b.dueDate)
     return aDate.getTime() - bDate.getTime()
   })
 
-  const pendingReminders = sortedReminders.filter(r => r.status === 'PENDING')
-  const overdueReminders = sortedReminders.filter(r => isOverdue(r.dueDate, r.dueTime))
-  const completedReminders = sortedReminders.filter(r => r.status === 'COMPLETED')
+  const pendingReminders = sortedReminders.filter(r => r.status === ReminderStatus.PENDING)
+  const overdueReminders = sortedReminders.filter(r => isOverdue(r.dueDate, r.dueTime || undefined))
+  const completedReminders = sortedReminders.filter(r => r.status === ReminderStatus.COMPLETED)
+
+  const renderAssignedTo = (assignedTo: { firstName: string; lastName: string }) => {
+    return (
+      <span className="inline-flex items-center">
+        <User className="h-4 w-4 mr-1" />
+        {assignedTo.firstName} {assignedTo.lastName}
+      </span>
+    )
+  }
 
   if (loading) {
     return (
@@ -288,8 +288,7 @@ const Reminders: React.FC = () => {
                 </div>
                 {reminder.assignedTo && (
                   <div className="flex items-center">
-                    <User className="h-4 w-4 mr-2" />
-                    Assigned to: {reminder.assignedTo}
+                    {renderAssignedTo(reminder.assignedTo)}
                   </div>
                 )}
               </div>

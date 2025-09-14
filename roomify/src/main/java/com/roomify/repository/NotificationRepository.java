@@ -2,6 +2,7 @@ package com.roomify.repository;
 
 import com.roomify.entity.Notification;
 import com.roomify.entity.NotificationPriority;
+import com.roomify.entity.NotificationStatus;
 import com.roomify.entity.NotificationType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +19,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Stri
     
     List<Notification> findByUserId(String userId);
     
-    List<Notification> findByUserIdAndStatus(String userId, boolean read);
+    List<Notification> findByUserIdAndStatus(String userId, NotificationStatus status);
     
     List<Notification> findByUserIdAndType(String userId, NotificationType type);
     
@@ -26,7 +27,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Stri
     
     List<Notification> findByHouseholdId(String householdId);
     
-    List<Notification> findByHouseholdIdAndStatus(String householdId, boolean read);
+    List<Notification> findByHouseholdIdAndStatus(String householdId, NotificationStatus status);
     
     List<Notification> findByHouseholdIdAndType(String householdId, NotificationType type);
     

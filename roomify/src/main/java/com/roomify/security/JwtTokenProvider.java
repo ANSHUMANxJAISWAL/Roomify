@@ -113,7 +113,7 @@ public class JwtTokenProvider {
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-        } catch (SignatureException ex) {
+        } catch (io.jsonwebtoken.security.SignatureException ex) {
             log.error("Invalid JWT signature");
             throw ex;
         } catch (MalformedJwtException ex) {
@@ -199,7 +199,7 @@ public class JwtTokenProvider {
             }
             
             return true;
-        } catch (SignatureException ex) {
+        } catch (io.jsonwebtoken.security.SignatureException ex) {
             log.error("Invalid JWT signature");
         } catch (MalformedJwtException ex) {
             log.error("Invalid JWT token");

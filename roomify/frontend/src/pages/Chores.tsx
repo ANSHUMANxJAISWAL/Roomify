@@ -132,7 +132,11 @@ const Chores: React.FC = () => {
             <span className={getStatusColor(chore.status)}>{chore.status}</span>
             <h3>{chore.title}</h3>
             <p>{chore.description}</p>
-            <span>Assigned to: {chore.assignedTo}</span>
+            <span>
+              Assigned to: {typeof chore.assignedTo === 'object' 
+                ? `${chore.assignedTo.firstName} ${chore.assignedTo.lastName}`
+                : chore.assignedTo || 'Unassigned'}
+            </span>
             <span>Due: {formatDate(chore.dueDate)}</span>
             <button onClick={() => setEditingChore(chore)} className="text-gray-400 hover:text-gray-600"><Edit /></button>
             <button onClick={() => handleDelete(chore.id)} className="text-red-400 hover:text-red-600"><Trash2 /></button>

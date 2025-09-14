@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, User, Mail, Lock, Check } from 'lucide-react'
-import { useAuth } from '../../hooks/useAuth'
+import { useAuth, AuthContextType } from '../../hooks/useAuth'
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -18,7 +18,7 @@ const Register: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   
-  const { register } = useAuth()
+  const { register } = useAuth() as AuthContextType
   const navigate = useNavigate()
 
   const validateForm = () => {

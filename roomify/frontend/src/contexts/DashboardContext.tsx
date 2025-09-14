@@ -10,7 +10,7 @@ import {
 import { dashboardAPI } from '../services/api'
 import toast from 'react-hot-toast'
 
-interface DashboardContextType {
+export interface DashboardContextType {
   stats: DashboardStats | null
   expenses: Expense[]
   chores: Chore[]

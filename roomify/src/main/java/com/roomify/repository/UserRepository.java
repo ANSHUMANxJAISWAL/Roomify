@@ -16,17 +16,9 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
     
-    Optional<User> findByUsername(String username);
-    
     Optional<User> findByEmail(String email);
     
-    Optional<User> findByUsernameOrEmail(String username, String email);
-    
-    boolean existsByUsername(String username);
-    
     boolean existsByEmail(String email);
-    
-    boolean existsByUsernameOrEmail(String username, String email);
     
     List<User> findByStatus(UserStatus status);
     
@@ -40,10 +32,10 @@ public interface UserRepository extends JpaRepository<User, String> {
     @Query("SELECT u FROM User u WHERE u.household.id = :householdId AND u.status = :status")
     List<User> findByHouseholdIdAndStatus(@Param("householdId") String householdId, @Param("status") UserStatus status);
     
-    @Query("SELECT u FROM User u WHERE u.username LIKE %:searchTerm% OR u.firstName LIKE %:searchTerm% OR u.lastName LIKE %:searchTerm% OR u.email LIKE %:searchTerm%")
+    @Query("SELECT u FROM User u WHERE u.firstName LIKE %:searchTerm% OR u.lastName LIKE %:searchTerm% OR u.email LIKE %:searchTerm%")
     Page<User> findBySearchTerm(@Param("searchTerm") String searchTerm, Pageable pageable);
     
-    @Query("SELECT u FROM User u WHERE u.household.id = :householdId AND (u.username LIKE %:searchTerm% OR u.firstName LIKE %:searchTerm% OR u.lastName LIKE %:searchTerm% OR u.email LIKE %:searchTerm%)")
+    @Query("SELECT u FROM User u WHERE u.household.id = :householdId AND (u.firstName LIKE %:searchTerm% OR u.lastName LIKE %:searchTerm% OR u.email LIKE %:searchTerm%)")
     Page<User> findByHouseholdIdAndSearchTerm(@Param("householdId") String householdId, @Param("searchTerm") String searchTerm, Pageable pageable);
     
     @Query("SELECT COUNT(u) FROM User u WHERE u.household.id = :householdId")
