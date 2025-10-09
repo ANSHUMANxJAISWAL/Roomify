@@ -2,7 +2,6 @@ package com.roomify.controller;
 
 import com.roomify.dto.UserDto;
 import com.roomify.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -14,8 +13,11 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("/me")
     @PreAuthorize("hasRole('USER')")

@@ -1,12 +1,12 @@
 package com.roomify.service.impl;
 
 import com.roomify.dto.ReminderDto;
-import com.roomify.entity.Reminder;
-import com.roomify.entity.ReminderStatus;
-import com.roomify.entity.User;
+import com.roomify.database.entities.Reminder;
+import com.roomify.database.entities.ReminderStatus;
+import com.roomify.database.entities.User;
 import com.roomify.exception.ResourceNotFoundException;
-import com.roomify.repository.ReminderRepository;
-import com.roomify.repository.UserRepository;
+import com.roomify.database.repositories.ReminderRepository;
+import com.roomify.database.repositories.UserRepository;
 import com.roomify.service.ReminderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,12 +27,12 @@ public class ReminderServiceImpl implements ReminderService {
 
     @Override
     public ReminderDto createReminder(ReminderDto reminderDto) {
-        Reminder reminder = new Reminder();
+        com.roomify.database.entities.Reminder reminder = new Reminder();
         reminder.setId(UUID.randomUUID().toString());
         reminder.setTitle(reminderDto.getTitle());
         reminder.setDescription(reminderDto.getDescription());
         reminder.setPriority(reminderDto.getPriority());
-        reminder.setStatus(ReminderStatus.PENDING);
+        reminder.setStatus(com.roomify.database.entities.ReminderStatus.PENDING);
         reminder.setType(reminderDto.getType());
         reminder.setDueDate(reminderDto.getDueDate());
         reminder.setCreatedAt(LocalDateTime.now());
@@ -54,7 +54,7 @@ public class ReminderServiceImpl implements ReminderService {
 
     @Override
     public ReminderDto getReminderById(String id) {
-        Reminder reminder = reminderRepository.findById(id)
+        com.roomify.database.entities.Reminder reminder = reminderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reminder", "id", id));
         return convertToDto(reminder);
     }
@@ -75,7 +75,7 @@ public class ReminderServiceImpl implements ReminderService {
 
     @Override
     public ReminderDto updateReminder(String id, ReminderDto reminderDto) {
-        Reminder reminder = reminderRepository.findById(id)
+        com.roomify.database.entities.Reminder reminder = reminderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reminder", "id", id));
         
         reminder.setTitle(reminderDto.getTitle());
@@ -105,10 +105,10 @@ public class ReminderServiceImpl implements ReminderService {
 
     @Override
     public ReminderDto markAsCompleted(String reminderId) {
-        Reminder reminder = reminderRepository.findById(reminderId)
+        com.roomify.database.entities.Reminder reminder = reminderRepository.findById(reminderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reminder", "id", reminderId));
         
-        reminder.setStatus(ReminderStatus.COMPLETED);
+        reminder.setStatus(com.roomify.database.entities.ReminderStatus.COMPLETED);
         reminder.setCompletedAt(LocalDateTime.now());
         reminder.setUpdatedAt(LocalDateTime.now());
         
@@ -116,7 +116,7 @@ public class ReminderServiceImpl implements ReminderService {
         return convertToDto(updatedReminder);
     }
 
-    private ReminderDto convertToDto(Reminder reminder) {
+    private ReminderDto convertToDto(com.roomify.database.entities.Reminder reminder) {
         ReminderDto dto = new ReminderDto();
         dto.setId(reminder.getId());
         dto.setTitle(reminder.getTitle());
@@ -141,3 +141,4 @@ public class ReminderServiceImpl implements ReminderService {
         return dto;
     }
 }
+

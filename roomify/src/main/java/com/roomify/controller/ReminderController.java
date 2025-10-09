@@ -2,7 +2,6 @@ package com.roomify.controller;
 
 import com.roomify.dto.ReminderDto;
 import com.roomify.service.ReminderService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -14,8 +13,11 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class ReminderController {
 
-    @Autowired
-    private ReminderService reminderService;
+    private final ReminderService reminderService;
+
+    public ReminderController(ReminderService reminderService) {
+        this.reminderService = reminderService;
+    }
 
     @PostMapping
     @PreAuthorize("hasRole('USER')")

@@ -2,12 +2,12 @@ package com.roomify.service.impl;
 
 import com.roomify.dto.UserDto;
 import com.roomify.dto.RegisterRequest;
-import com.roomify.entity.User;
-import com.roomify.entity.UserRole;
-import com.roomify.entity.UserStatus;
+import com.roomify.database.entities.User;
+import com.roomify.database.entities.UserRole;
+import com.roomify.database.entities.UserStatus;
 import com.roomify.exception.ResourceAlreadyExistsException;
 import com.roomify.exception.ResourceNotFoundException;
-import com.roomify.repository.UserRepository;
+import com.roomify.database.repositories.UserRepository;
 import com.roomify.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
             throw new ResourceAlreadyExistsException("User", "email", request.getEmail());
         }
 
-        User user = new User();
+        com.roomify.database.entities.User user = new User();
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setFirstName(request.getFirstName());
@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
         user.setPhoneNumber(request.getPhoneNumber());
         // Username is handled by the email field in User entity
         user.setRole(UserRole.USER);
-        user.setStatus(UserStatus.ACTIVE);
+        user.setStatus(com.roomify.database.entities.UserStatus.ACTIVE);
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
 
@@ -53,14 +53,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserById(String id) {
-        User user = userRepository.findById(id)
+        com.roomify.database.entities.User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
         return convertToDto(user);
     }
 
     @Override
     public UserDto getUserByEmail(String email) {
-        User user = userRepository.findByEmail(email)
+        com.roomify.database.entities.User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
         return convertToDto(user);
     }
@@ -74,7 +74,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateUser(String id, UserDto userDto) {
-        User user = userRepository.findById(id)
+        com.roomify.database.entities.User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
 
         user.setFirstName(userDto.getFirstName());
@@ -108,7 +108,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
+        com.roomify.database.entities.User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
         
         return org.springframework.security.core.userdetails.User.builder()
@@ -118,7 +118,7 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
-    private UserDto convertToDto(User user) {
+    private UserDto convertToDto(com.roomify.database.entities.User user) {
         UserDto dto = new UserDto();
         dto.setId(user.getId());
         dto.setEmail(user.getEmail());
@@ -139,3 +139,4 @@ public class UserServiceImpl implements UserService {
         return dto;
     }
 }
+

@@ -4,7 +4,6 @@ import {
   MapPin, Users, Home, Calendar, MessageCircle, Settings 
 } from 'lucide-react';
 import { Address } from '../types';
-import { useAuth } from '../hooks/useAuth';
 import { useDashboard } from '../contexts/DashboardContext';
 import { formatDate } from '../utils/formatters';
 import { 
@@ -35,7 +34,6 @@ interface HouseholdFormData {
 }
 
 const Roommates: React.FC = () => {
-  const { user } = useAuth();
   const { households, loading } = useDashboard();
   
   // State for UI
@@ -70,15 +68,11 @@ const Roommates: React.FC = () => {
   });
   
   // Get current household (assuming first household for now)
-  const currentHousehold = households?.[0];
-  const isAdmin = currentHousehold?.members?.some(
-    (m: HouseholdMember) => m.user?.id === user?.id && m.role === HouseholdMemberRole.ADMIN
-  );
+  const currentHousehold = households?.[0]
+  const isAdmin = true // Demo admin status since auth is removed
   
-  // Get current user's membership
-  const currentUserMembership = currentHousehold?.members?.find(
-    (m: HouseholdMember) => m.user?.id === user?.id
-  );
+  // Get current user's membership (demo data)
+  const currentUserMembership = currentHousehold?.members?.[0];
 
   // Helper function to safely access member properties
   const getMemberProperty = (member: HouseholdMember, prop: keyof HouseholdMember | keyof User): any => {

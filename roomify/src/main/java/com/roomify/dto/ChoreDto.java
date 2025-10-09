@@ -1,9 +1,9 @@
 package com.roomify.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.roomify.entity.ChoreFrequency;
-import com.roomify.entity.ChorePriority;
-import com.roomify.entity.ChoreStatus;
+import com.roomify.database.entities.ChoreFrequency;
+import com.roomify.database.entities.ChorePriority;
+import com.roomify.database.entities.ChoreStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

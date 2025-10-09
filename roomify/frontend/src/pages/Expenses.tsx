@@ -188,8 +188,8 @@ const Expenses: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Expenses</h1>
-          <p className="text-gray-600">Manage and track shared household expenses.</p>
+          <h1 className="text-3xl font-bold text-gradient-heading drop-shadow-lg">Expenses</h1>
+          <p className="text-gray-300 mt-2">Manage and track shared household expenses.</p>
         </div>
         <button onClick={() => setShowCreateModal(true)} className="btn-primary">
           <Plus className="h-4 w-4 mr-2" />
@@ -205,8 +205,8 @@ const Expenses: React.FC = () => {
               <DollarSign className="h-6 w-6 text-blue-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Expenses</p>
-              <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalExpenses)}</p>
+              <p className="text-sm font-medium text-gray-300">Total Expenses</p>
+              <p className="text-2xl font-bold text-white">{formatCurrency(totalExpenses)}</p>
             </div>
           </div>
         </div>
@@ -216,8 +216,8 @@ const Expenses: React.FC = () => {
               <Clock className="h-6 w-6 text-yellow-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Pending</p>
-              <p className="text-2xl font-bold text-gray-900">{pendingExpenses.length}</p>
+              <p className="text-sm font-medium text-gray-300">Pending</p>
+              <p className="text-2xl font-bold text-white">{pendingExpenses.length}</p>
             </div>
           </div>
         </div>
@@ -227,8 +227,8 @@ const Expenses: React.FC = () => {
               <AlertTriangle className="h-6 w-6 text-red-600" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Overdue</p>
-              <p className="text-2xl font-bold text-gray-900">{overdueExpenses.length}</p>
+              <p className="text-sm font-medium text-gray-300">Overdue</p>
+              <p className="text-2xl font-bold text-white">{overdueExpenses.length}</p>
             </div>
           </div>
         </div>
@@ -238,17 +238,17 @@ const Expenses: React.FC = () => {
 
       {filteredExpenses.length === 0 && (
         <div className="text-center py-12">
-          <Receipt className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No expenses found</h3>
-          <p className="text-gray-500">Create your first expense to get started!</p>
+          <Receipt className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-white mb-2">No expenses found</h3>
+          <p className="text-gray-300">Create your first expense to get started!</p>
         </div>
       )}
 
       {/* Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-semibold mb-4">
+          <div className="glass backdrop-blur-xl border border-slate-700/30 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            <h2 className="text-xl font-semibold mb-4 text-white">
               {editingExpense ? 'Edit Expense' : 'Add New Expense'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">

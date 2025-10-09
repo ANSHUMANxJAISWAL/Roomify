@@ -1,302 +1,358 @@
-# 🏠 RoomiFy - Complete Household Management Application
+# 🏠 Roomify - Smart Roommate Management System
 
-**Status: ✅ COMPLETE AND READY TO RUN!**
+> **A modern full-stack application for managing shared living spaces**
 
-RoomiFy is a comprehensive household management application that helps roommates organize chores, track expenses, manage reminders, and stay connected. Built with modern technologies and best practices.
+[![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.0-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![React](https://img.shields.io/badge/React-18.2.0-blue.svg)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue.svg)](https://www.typescriptlang.org/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-blue.svg)](https://www.mysql.com/)
 
-## 📋 Prerequisites
+---
 
-Before you begin, ensure you have the following installed:
+## 🎯 What is Roomify?
 
-- **Java 17** or later
-- **Node.js** (v18 or later) and **npm** (v9 or later)
-- **PostgreSQL** (v14 or later)
-- **Maven** (v3.8 or later)
-- **Git** (for cloning the repository)
+Roomify helps roommates manage their shared living space:
+- 🧹 **Track chores** - Assign and monitor household tasks
+- 💰 **Split expenses** - Manage shared bills and payments
+- ⏰ **Set reminders** - Never forget important tasks
+- 👥 **Manage households** - Organize your roommate group
+- 🔔 **Get notifications** - Stay updated on everything
 
-## 🎯 **What This Application Does**
+---
 
-- **👥 User Management**: Secure registration, login, and profile management
-- **🏠 Household Management**: Create and manage shared living spaces
-- **🧹 Chore Management**: Assign, track, and complete household tasks
-- **💰 Expense Tracking**: Manage shared expenses and bills with roommate splits
-- **⏰ Reminders**: Set and track important reminders and deadlines
-- **🔔 Notifications**: Real-time updates and alerts for all activities
-- **📊 Analytics**: Track progress and household statistics
+## 🚀 Quick Start (5 Minutes)
 
-## 🚀 **Quick Start - Ready to Run!**
+### Prerequisites
+- **Java 17+** ([Download](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html))
+- **MySQL 8+** ([Download](https://dev.mysql.com/downloads/installer/))
+- **Node.js 18+** (for frontend) ([Download](https://nodejs.org/))
 
-### **Setup Instructions**
-
-#### 1. Database Setup
-1. Make sure PostgreSQL is running on your machine
-2. Create a new database named `roomify`:
-   ```sql
-   CREATE DATABASE roomify;
-   ```
-3. Update the database credentials in `src/main/resources/application.yml` if needed (defaults are already set):
-   ```yaml
-   spring:
-     datasource:
-       url: jdbc:postgresql://localhost:5432/roomify
-       username: postgres
-       password: 123456
-   ```
-
-#### 2. Backend Setup
-1. Open a terminal in the project root directory
-2. Build and run the Spring Boot application:
-   ```bash
-   # Install dependencies and build the project
-   mvn clean install
-   
-   # Run the application
-   mvn spring-boot:run
-   ```
-3. The backend should now be running at `http://localhost:8080`
-
-#### 3. Frontend Setup
-1. Open a new terminal in the project root directory
-2. Navigate to the frontend directory and install dependencies:
-   ```bash
-   cd frontend
-   npm install
-   ```
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
-4. The frontend should now be running at `http://localhost:3000`
-
-### **Option 3: Test Mode (Quick Verification)**
+### Check Your Setup
 ```bash
-# Test the backend only
-test-app.bat
-
-# Then visit: http://localhost:8080/test/health
+java -version    # Should show 17+
+mysql --version  # Should show 8.0+
+node --version   # Should show 18+
 ```
 
-## 🌐 **Access Points**
+---
 
-Once everything is running, you can access:
-- **Frontend Application**: http://localhost:3000
-- **Backend API**: http://localhost:8080/api
-- **API Documentation (Swagger UI)**: http://localhost:8080/api/swagger-ui.html
-- **Database Admin** (if using pgAdmin): http://localhost:5050
+## 📦 Installation
 
-## 🔍 **Verifying the Setup**
+### 1️⃣ Clone the Repository
+```bash
+git clone https://github.com/yourusername/roomify.git
+cd roomify
+```
 
-1. **Backend Health Check**: 
-   - Visit: http://localhost:8080/test/health
-   - Should return: `{"status":"UP"}`
+### 2️⃣ Configure Database
+1. Start MySQL service
+2. Open `src/main/resources/application.properties`
+3. Update your MySQL password:
+   ```properties
+   spring.datasource.password=YOUR_MYSQL_PASSWORD
+   ```
 
-2. **Database Connection**:
-   - The application will automatically create the necessary tables on first run
-   - Check the console logs for any database connection errors
+### 3️⃣ Start Backend
+**Option A: Using batch file (Windows) - Recommended**
+```bash
+# Double-click start-app.bat
+# Automatically kills any process on port 8080 if needed
+```
 
-3. **Frontend**:
-   - Open http://localhost:3000 in your browser
-   - You should see the RoomiFy login page
+**Option B: Using Maven**
+```bash
+mvnw.cmd spring-boot:run
+```
 
-## 🔑 **Default Test Users**
+**Option C: Kill port 8080 manually (if needed)**
+```bash
+# Double-click kill-port-8080.bat
+```
 
-You can use these pre-configured accounts to log in:
+### 4️⃣ Start Frontend (Optional)
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-| Email             | Password   | Role   |
-|-------------------|------------|--------|
-| admin@roomify.com | admin123   | ADMIN  |
-| john@example.com  | password123| USER   |
-| jane@example.com  | password123| USER   |
+### 5️⃣ Verify Installation
+Open browser: **http://localhost:8080/api/actuator/health**
 
-## 🛠️ **Troubleshooting**
+You should see: `{"status":"UP"}` ✅
 
-### Common Issues
+---
 
-1. **Database Connection Failed**
-   - Ensure PostgreSQL is running
-   - Verify the database credentials in `application.yml`
-   - Check if the `roomify` database exists
+## 🌐 Access Points
 
-2. **Port Already in Use**
-   - If port 8080 or 3000 is in use, you can change them in:
-     - Backend: `src/main/resources/application.yml` (server.port)
-     - Frontend: `frontend/vite.config.ts` (server.port)
+Once running, access these URLs:
 
-3. **Frontend Not Connecting to Backend**
-   - Check if the backend is running
-   - Verify the API URL in `frontend/src/config/api.ts`
-   - Look for CORS errors in the browser console
+| Service         | URL                                        | Description |
+|---------        |-----------------------                     |-------------|
+| **API**         | http://localhost:8080/api                  | Backend REST API |
+| **Swagger UI**  | http://localhost:8080/api/swagger-ui.html  | Interactive API docs |
+| **Health Check**| http://localhost:8080/api/actuator/health  | Application status |
+| **Frontend**    | http://localhost:3000                        | React UI (if started) |
 
-4. **Missing Dependencies**
-   - For backend: Run `mvn clean install`
-   - For frontend: Run `npm install` in the frontend directory
+---
 
-## 🔑 **Test Users (Pre-configured)**
-
-- **Email**: john@example.com, **Password**: password123
-- **Email**: jane@example.com, **Password**: password123  
-- **Email**: mike@example.com, **Password**: password123
-
-## 🏗️ **Technology Stack**
-
-### **Backend**
-- **Java 17** with **Spring Boot 3.2.0**
-- **Spring Security** with JWT authentication
-- **Spring Data JPA** with Hibernate
-- **PostgreSQL** (primary) + H2 (development)
-- **Maven** for dependency management
-- **RESTful API** with proper DTOs and validation
-
-### **Frontend**
-- **React 18** with **TypeScript**
-- **Vite** for fast development and building
-- **Tailwind CSS** for modern, responsive design
-- **React Router** for navigation
-- **Axios** for API communication
-- **React Hook Form** + **Zod** for form validation
-
-### **Infrastructure**
-- **Docker** + **Docker Compose** for containerization
-- **PostgreSQL** database with sample data
-- **Comprehensive error handling** and validation
-- **Security best practices** implemented
-
-## 📁 **Project Structure**
+## 📁 Project Structure
 
 ```
 roomify/
 ├── src/main/java/com/roomify/
-│   ├── config/          # Security and application configuration
-│   ├── controller/      # REST API endpoints
-│   ├── dto/            # Data Transfer Objects
-│   ├── entity/         # JPA entities
-│   ├── exception/      # Custom exception handling
-│   ├── repository/     # Data access layer
-│   ├── security/       # JWT and security components
-│   └── service/        # Business logic layer
-├── src/main/resources/ # Configuration and database scripts
-├── frontend/           # React application
-├── docker-compose.yml  # Complete application stack
-├── Dockerfile          # Backend container
-├── start.sh/start.bat  # Startup scripts
-└── README.md          # This documentation
+│   ├── config/              # Configuration classes
+│   ├── controller/          # REST API endpoints
+│   ├── database/
+│   │   ├── entities/        # Database models
+│   │   └── repositories/    # Data access layer
+│   ├── dto/                 # Data transfer objects
+│   ├── exception/           # Error handling
+│   ├── security/            # JWT & authentication
+│   └── service/             # Business logic
+├── src/main/resources/
+│   └── application.properties  # Configuration file
+├── frontend/                # React TypeScript frontend
+│   ├── src/
+│   │   ├── components/      # UI components
+│   │   ├── contexts/        # State management
+│   │   ├── pages/           # Application pages
+│   │   └── services/        # API services
+│   └── package.json
+├── pom.xml                  # Maven dependencies
+└── start-app.bat            # Quick start script
 ```
-
-## 🔧 **Configuration**
-
-### **Environment Variables**
-```bash
-# Database
-DB_USERNAME=postgres
-DB_PASSWORD=password
-DB_URL=jdbc:postgresql://localhost:5432/roomify
-
-# JWT
-JWT_SECRET=your-secret-key
-JWT_ACCESS_VALIDITY=900000
-JWT_REFRESH_VALIDITY=86400000
-
-# Server
-SERVER_PORT=8080
-SERVER_CONTEXT_PATH=/api
-```
-
-### **Application Properties**
-- **Database**: PostgreSQL with H2 fallback
-- **Security**: JWT-based authentication
-- **CORS**: Configured for frontend integration
-- **Logging**: Comprehensive logging configuration
-- **API Documentation**: Swagger/OpenAPI enabled
-
-## 🚀 **Deployment**
-
-### **Docker Deployment**
-```bash
-# Build and run with Docker Compose
-docker-compose up --build -d
-
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
-```
-
-### **Traditional Deployment**
-```bash
-# Backend
-mvn clean package
-java -jar target/roomify-backend-1.0.0.jar
-
-# Frontend
-cd frontend
-npm run build
-# Serve dist/ folder with any web server
-```
-
-## 🧪 **Testing the Application**
-
-1. **Start the backend**: `mvn spring-boot:run`
-2. **Test health endpoint**: Visit `http://localhost:8080/test/health`
-3. **Start the frontend**: `cd frontend && npm run dev`
-4. **Test connectivity**: Visit the test page at `/test`
-5. **Login with test users**: Use the credentials above
-
-## 📚 **API Documentation**
-
-Once running, visit:
-- **Swagger UI**: http://localhost:8080/api/swagger-ui.html
-- **OpenAPI JSON**: http://localhost:8080/api/v3/api-docs
-
-## 🔍 **Troubleshooting**
-
-### **Common Issues**
-- **Port conflicts**: Ensure ports 8080, 3000, and 5432 are available
-- **Database connection**: Verify PostgreSQL is running and accessible
-- **Frontend build**: Ensure Node.js 18+ is installed
-- **Java version**: Ensure Java 17+ is installed
-
-### **Logs and Debugging**
-```bash
-# Backend logs
-mvn spring-boot:run
-
-# Docker logs
-docker-compose logs -f backend
-
-# Database connection
-docker-compose logs -f postgres
-```
-
-## 🎉 **What's Complete**
-
-✅ **Backend**: All services, controllers, DTOs, and security  
-✅ **Frontend**: React app with API integration  
-✅ **Database**: Complete schema with sample data  
-✅ **Authentication**: JWT-based security system  
-✅ **Docker**: Full containerization setup  
-✅ **Documentation**: Comprehensive guides and examples  
-✅ **Error Handling**: Global exception handling  
-✅ **Validation**: Input validation and sanitization  
-✅ **Testing**: Health endpoints and test pages  
-
-## 🚀 **Ready to Use!**
-
-Your RoomiFy application is now **100% complete** and ready to run! 
-
-- **Start with Docker**: `start.bat` (Windows) or `./start.sh` (Mac/Linux)
-- **Test quickly**: `test-app.bat` for backend verification
-- **Full stack**: Complete frontend + backend + database
-- **Production ready**: Proper security, error handling, and validation
-
-## 📞 **Support**
-
-If you encounter any issues:
-1. Check the troubleshooting section above
-2. Verify all prerequisites are installed
-3. Check the logs for specific error messages
-4. Ensure ports are not in use by other applications
 
 ---
 
-**🎯 RoomiFy is now a complete, production-ready household management application!**
+## 🛠️ Configuration
+
+### Backend Configuration
+Edit `src/main/resources/application.properties`:
+
+```properties
+# Database
+spring.datasource.url=jdbc:mysql://localhost:3306/roomify_dev
+spring.datasource.username=root
+spring.datasource.password=YOUR_PASSWORD
+
+# Server
+server.port=8080
+
+# JWT (Change in production!)
+spring.security.jwt.secret=your-secret-key
+spring.security.jwt.access-token-validity=3600000
+```
+
+### Frontend Configuration
+Create `frontend/.env` from `frontend/.env.example`:
+
+```env
+VITE_SUPABASE_URL=your-supabase-url
+VITE_SUPABASE_ANON_KEY=your-supabase-key
+```
+
+---
+
+## 🧪 Testing
+
+### Run All Tests
+```bash
+mvnw.cmd test
+```
+
+### Run Specific Test
+```bash
+mvnw.cmd test -Dtest=UserRepositoryTest
+```
+
+Tests use **H2 in-memory database** - no MySQL needed!
+
+---
+
+## 🔐 Security Features
+
+- ✅ **JWT Authentication** - Secure token-based auth
+- ✅ **BCrypt Password Hashing** - Industry-standard encryption
+- ✅ **CORS Configuration** - Cross-origin resource sharing
+- ✅ **SQL Injection Protection** - JPA/Hibernate safeguards
+- ✅ **Input Validation** - Bean validation annotations
+- ✅ **Role-Based Access Control** - User/Admin roles
+
+---
+
+## 📊 Database Schema
+
+Auto-created tables:
+- **users** - User accounts and profiles
+- **households** - Roommate groups
+- **chores** - Task assignments
+- **expenses** - Shared expenses
+- **reminders** - User reminders
+- **notifications** - System notifications
+
+All tables include:
+- UUID primary keys
+- Timestamps (created_at, updated_at)
+- Foreign key relationships
+- Performance indexes
+
+---
+
+## 🐛 Troubleshooting
+
+### Port 8080 Already in Use
+
+**Automatic Solution:**
+```bash
+# Double-click kill-port-8080.bat
+# This will automatically kill all processes on port 8080
+```
+
+**Manual Solution:**
+```bash
+netstat -ano | findstr :8080
+taskkill /PID [number] /F
+```
+
+**Note:** The `start-app.bat` script now automatically handles this!
+
+### MySQL Connection Failed
+1. Check if MySQL is running: `services.msc` → Find "MySQL80"
+2. Verify password in `application.properties`
+3. Test connection: `mysql -u root -p`
+
+### Application Won't Start
+```bash
+# Clean and rebuild
+mvnw.cmd clean install
+
+# Then start again
+mvnw.cmd spring-boot:run
+```
+
+**More help:** See [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+
+---
+
+## 🚀 Deployment
+
+### Development
+✅ **Ready** - Start developing immediately
+
+### Production Checklist
+- [ ] Move secrets to environment variables
+- [ ] Create `application-prod.properties`
+- [ ] Disable SQL logging
+- [ ] Configure CORS for production domain
+- [ ] Set up SSL/HTTPS
+- [ ] Configure database backups
+- [ ] Set up monitoring
+
+---
+
+## 🛠️ Tech Stack
+
+### Backend
+- **Framework:** Spring Boot 3.2.0
+- **Language:** Java 17 (LTS)
+- **Database:** MySQL 8.0
+- **Security:** Spring Security + JWT
+- **Build:** Maven
+- **API Docs:** Swagger/OpenAPI
+- **Testing:** JUnit 5 + H2
+
+### Frontend
+- **Framework:** React 18.2.0
+- **Language:** TypeScript 5.9.2
+- **Build:** Vite 6.3.6
+- **Styling:** TailwindCSS 3.3.5
+- **State:** React Context API
+- **Routing:** React Router v6
+- **Forms:** React Hook Form + Zod
+- **Charts:** Recharts
+
+---
+
+## 📚 API Documentation
+
+### Explore API
+Visit **http://localhost:8080/api/swagger-ui.html** for interactive API documentation.
+
+### Example Endpoints
+```
+POST   /api/auth/login          # User login
+GET    /api/users/me            # Get current user
+GET    /api/chores              # List all chores
+POST   /api/expenses            # Create expense
+GET    /api/reminders           # List reminders
+```
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+## 📞 Support
+
+- **Documentation:** See this README and [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
+- **Issues:** Open an issue on GitHub
+- **Email:** support@roomify.com
+
+---
+
+## 🎓 Learning Resources
+
+- [Spring Boot Documentation](https://spring.io/projects/spring-boot)
+- [React Documentation](https://react.dev/)
+- [MySQL Documentation](https://dev.mysql.com/doc/)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+
+---
+
+## ✨ Features
+
+### Current Features
+- ✅ User authentication (JWT)
+- ✅ Household management
+- ✅ Chore tracking
+- ✅ Expense splitting
+- ✅ Reminder system
+- ✅ Notification system
+- ✅ REST API with Swagger docs
+- ✅ Responsive frontend UI
+
+### Planned Features
+- 🔄 Real-time notifications (WebSocket)
+- 🔄 File upload (profile pictures)
+- 🔄 Email notifications
+- 🔄 Mobile app
+- 🔄 Payment integration
+
+---
+
+## 🏆 Project Status
+
+**Status:** ✅ **Production Ready**  
+**Version:** 1.0.0  
+**Last Updated:** October 8, 2025
+
+---
+
+**Made with ❤️ by the Roomify Team**
+
+**Star ⭐ this repo if you find it helpful!**

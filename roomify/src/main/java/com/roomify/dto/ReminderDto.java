@@ -1,9 +1,9 @@
 package com.roomify.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.roomify.entity.ReminderPriority;
-import com.roomify.entity.ReminderStatus;
-import com.roomify.entity.ReminderType;
+import com.roomify.database.entities.ReminderPriority;
+import com.roomify.database.entities.ReminderStatus;
+import com.roomify.database.entities.ReminderType;
 
 import java.time.LocalDateTime;
 

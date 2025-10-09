@@ -1,60 +1,49 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { 
-  Menu, 
-  Bell, 
-  Search, 
-  User, 
-  Settings, 
-  LogOut,
+import {
+  Menu,
+  Bell,
+  Search,
+  Settings,
   ChevronDown
 } from 'lucide-react'
-import { useAuth } from '../../hooks/useAuth'
 import { useDashboard } from '../../contexts/DashboardContext'
-import { AuthContextType } from '../../contexts/AuthContext'
 
 interface HeaderProps {
   onMenuClick: () => void
 }
 
 const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
-  const { user, logout } = useAuth() as AuthContextType
   const { notifications } = useDashboard()
-  const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
 
   const unreadNotifications = notifications.filter(n => !n.readAt)
 
-  const handleLogout = async () => {
-    await logout()
-    setUserMenuOpen(false)
-  }
-
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200">
-      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16">
+    <header className="fixed top-0 left-0 right-0 z-50 glass backdrop-blur-xl border-b border-slate-700/30">
+      <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 h-20">
         {/* Left side */}
         <div className="flex items-center">
           <button
             onClick={onMenuClick}
-            className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+            className="lg:hidden p-2 rounded-md text-gray-300 hover:text-purple-400 hover:bg-slate-800/50 transition-colors duration-200"
           >
             <Menu className="h-6 w-6" />
           </button>
-          
-          <div className="ml-4 lg:ml-0">
-            <h1 className="text-2xl font-bold text-gradient">RoomiFy</h1>
+
+          <div className="ml-4 lg:ml-0 flex items-center">
+            <h1 className="text-3xl font-bold text-gradient-heading drop-shadow-lg">RoomiFy</h1>
           </div>
         </div>
 
         {/* Center - Search */}
         <div className="flex-1 max-w-lg mx-4 hidden md:block">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-300" />
             <input
               type="text"
               placeholder="Search expenses, chores, reminders..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-slate-600/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 bg-slate-800/50 backdrop-blur-sm text-gray-100 placeholder-gray-400"
             />
           </div>
         </div>
@@ -65,7 +54,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           <div className="relative">
             <button
               onClick={() => setNotificationsOpen(!notificationsOpen)}
-              className="relative p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-lg"
+              className="relative p-2 text-gray-300 hover:text-purple-400 hover:bg-slate-800/50 rounded-xl transition-all duration-200"
             >
               <Bell className="h-6 w-6" />
               {unreadNotifications.length > 0 && (
@@ -77,29 +66,29 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
 
             {/* Notifications dropdown */}
             {notificationsOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                <div className="p-4 border-b border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+              <div className="absolute right-0 mt-2 w-80 glass backdrop-blur-xl border border-slate-700/30 rounded-2xl shadow-2xl z-50">
+                <div className="p-4 border-b border-slate-700/30">
+                  <h3 className="text-lg font-semibold text-gray-100">Notifications</h3>
                 </div>
                 <div className="max-h-96 overflow-y-auto">
                   {notifications.length === 0 ? (
-                    <div className="p-4 text-center text-gray-500">
+                    <div className="p-4 text-center text-gray-300">
                       No notifications
                     </div>
                   ) : (
                     notifications.slice(0, 5).map((notification) => (
                       <div
                         key={notification.id}
-                        className={`p-4 border-b border-gray-100 hover:bg-gray-50 ${
-                          !notification.readAt ? 'bg-blue-50' : ''
+                        className={`p-4 border-b border-slate-700/30 hover:bg-slate-800/30 transition-colors duration-200 ${
+                          !notification.readAt ? 'bg-purple-500/10' : ''
                         }`}
                       >
                         <div className="flex items-start">
                           <div className="flex-1">
-                            <p className="text-sm font-medium text-gray-900">
+                            <p className="text-sm font-medium text-gray-100">
                               {notification.title}
                             </p>
-                            <p className="text-sm text-gray-600 mt-1">
+                            <p className="text-sm text-gray-300 mt-1">
                               {notification.message}
                             </p>
                             <p className="text-xs text-gray-400 mt-2">
@@ -112,10 +101,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                   )}
                 </div>
                 {notifications.length > 5 && (
-                  <div className="p-4 border-t border-gray-200">
+                  <div className="p-4 border-t border-slate-700/30">
                     <Link
                       to="/notifications"
-                      className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                      className="text-sm text-purple-400 hover:text-purple-300 font-medium transition-colors duration-200"
                     >
                       View all notifications
                     </Link>
@@ -125,65 +114,21 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
             )}
           </div>
 
-          {/* User menu */}
-          <div className="relative">
-            <button
-              onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="flex items-center space-x-2 p-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
-            >
-              <div className="h-8 w-8 bg-primary-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">
-                  {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
-                </span>
-              </div>
-              <span className="hidden sm:block text-sm font-medium">
-                {user?.firstName} {user?.lastName}
-              </span>
-              <ChevronDown className="h-4 w-4" />
-            </button>
-
-            {/* User dropdown */}
-            {userMenuOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                <div className="py-1">
-                  <Link
-                    to="/profile"
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    onClick={() => setUserMenuOpen(false)}
-                  >
-                    <User className="h-4 w-4 mr-3" />
-                    Profile
-                  </Link>
-                  <Link
-                    to="/settings"
-                    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    onClick={() => setUserMenuOpen(false)}
-                  >
-                    <Settings className="h-4 w-4 mr-3" />
-                    Settings
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    <LogOut className="h-4 w-4 mr-3" />
-                    Sign out
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          {/* Settings */}
+          <Link
+            to="/settings"
+            className="p-2 text-gray-300 hover:text-purple-400 hover:bg-slate-800/50 rounded-xl transition-all duration-200"
+          >
+            <Settings className="h-6 w-6" />
+          </Link>
         </div>
       </div>
 
       {/* Click outside to close dropdowns */}
-      {(userMenuOpen || notificationsOpen) && (
+      {notificationsOpen && (
         <div
           className="fixed inset-0 z-40"
-          onClick={() => {
-            setUserMenuOpen(false)
-            setNotificationsOpen(false)
-          }}
+          onClick={() => setNotificationsOpen(false)}
         />
       )}
     </header>

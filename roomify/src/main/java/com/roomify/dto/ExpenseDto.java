@@ -1,8 +1,8 @@
 package com.roomify.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.roomify.entity.ExpenseCategory;
-import com.roomify.entity.ExpenseStatus;
+import com.roomify.database.entities.ExpenseCategory;
+import com.roomify.database.entities.ExpenseStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -17,7 +17,7 @@ public class ExpenseDto {
     private ExpenseStatus status;
     
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate dueDate;
+    private LocalDate date;
     
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate paidDate;
@@ -54,8 +54,8 @@ public class ExpenseDto {
     public ExpenseStatus getStatus() { return status; }
     public void setStatus(ExpenseStatus status) { this.status = status; }
     
-    public LocalDate getDueDate() { return dueDate; }
-    public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
+    public LocalDate getDate() { return date; }
+    public void setDate(LocalDate date) { this.date = date; }
     
     public LocalDate getPaidDate() { return paidDate; }
     public void setPaidDate(LocalDate paidDate) { this.paidDate = paidDate; }

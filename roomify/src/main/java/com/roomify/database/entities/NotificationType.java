@@ -1,0 +1,19 @@
+package com.roomify.database.entities;
+
+public enum NotificationType {
+    EXPENSE_ADDED,
+    EXPENSE_SETTLED,
+    CHORE_ASSIGNED,
+    CHORE_COMPLETED,
+    CHORE_OVERDUE,
+    REMINDER_DUE,
+    REMINDER_OVERDUE,
+    HOUSEHOLD_INVITE,
+    HOUSEHOLD_JOINED,
+    HOUSEHOLD_LEFT,
+    PAYMENT_DUE,
+    PAYMENT_RECEIVED,
+    SYSTEM_UPDATE,
+    GENERAL
+}
+

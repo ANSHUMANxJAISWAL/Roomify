@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig, AxiosHeaders } from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { toast } from 'react-toastify';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
@@ -10,26 +10,6 @@ export interface ApiResponse<T = any> {
   error?: string;
 }
 
-// Token response type
-interface TokenResponse {
-  accessToken: string;
-  refreshToken: string;
-}
-
-// Extend Axios types to include our custom config
-declare module 'axios' {
-  export interface AxiosRequestConfig {
-    _retry?: boolean;
-    skipAuthRefresh?: boolean;
-  }
-}
-
-// Custom type for our API requests
-type RoomifyApiRequestConfig = InternalAxiosRequestConfig & {
-  _retry?: boolean;
-  skipAuthRefresh?: boolean;
-};
-
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000, // 10 seconds
@@ -37,34 +17,9 @@ const api = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  withCredentials: true, // Important for cookies, authorization headers with TLS
 });
 
-// Request interceptor to add auth token
-api.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    const typedConfig = config as RoomifyApiRequestConfig;
-    // Skip auth header for auth routes or when skipAuthRefresh is true
-    if (typedConfig.skipAuthRefresh || typedConfig.url?.includes('/auth/')) {
-      return config;
-    }
-    
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      // Create new headers with the token
-      const headers = new AxiosHeaders(typedConfig.headers);
-      headers.set('Authorization', `Bearer ${token}`);
-      typedConfig.headers = headers;
-    }
-    
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Response interceptor to handle token refresh and errors
+// Response interceptor to handle errors
 api.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
     // Handle successful responses with messages
@@ -73,135 +28,20 @@ api.interceptors.response.use(
     }
     return response;
   },
-  async (error: AxiosError<ApiResponse>) => {
-    if (!error.config) {
-      return Promise.reject(error);
-    }
-
-    const originalRequest = error.config;
-    
-    // Handle token refresh on 401 errors
-    if (error.response?.status === 401 && !(originalRequest as RoomifyApiRequestConfig)._retry) {
-      // Don't retry refresh token for auth routes
-      if (originalRequest.url?.includes('/auth/')) {
-        return Promise.reject(error);
-      }
-      
-      (originalRequest as RoomifyApiRequestConfig)._retry = true;
-      
-      try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (refreshToken) {
-          const response = await api.post<TokenResponse>(
-            '/auth/refresh',
-            { refreshToken },
-            { skipAuthRefresh: true } as any // Type assertion to bypass type checking
-          );
-          
-          if (response.data?.accessToken && response.data?.refreshToken) {
-            const { accessToken, refreshToken: newRefreshToken } = response.data;
-            
-            // Store new tokens
-            localStorage.setItem('accessToken', accessToken);
-            localStorage.setItem('refreshToken', newRefreshToken);
-            
-            // Update the original request with new token
-            const headers = new AxiosHeaders(originalRequest.headers);
-            headers.set('Authorization', `Bearer ${accessToken}`);
-            originalRequest.headers = headers;
-            
-            return api(originalRequest);
-          }
-        }
-      } catch (refreshError) {
-        // If refresh fails, clear tokens and redirect to login
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        window.location.href = '/login?session=expired';
-        return Promise.reject(refreshError);
-      }
-    }
-    
-    // Handle other errors
-    const errorMessage = error.response?.data?.error || 
-                        error.response?.data?.message || 
-                        error.message || 
+  (error: AxiosError<ApiResponse>) => {
+    const errorMessage = error.response?.data?.error ||
+                        error.response?.data?.message ||
+                        error.message ||
                         'An error occurred';
-    
-    // Don't show error toast for 401 (handled above) or 404 (handled by UI)
-    if (error.response?.status !== 401 && error.response?.status !== 404) {
+
+    // Don't show error toast for 404 (handled by UI)
+    if (error.response?.status !== 404) {
       toast.error(errorMessage, { autoClose: 5000 });
     }
-    
+
     return Promise.reject(error);
   }
 );
-
-// Auth API
-export const authAPI = {
-  login: (credentials: { email: string; password: string; rememberMe?: boolean }) =>
-    api.post<{ 
-      accessToken: string; 
-      refreshToken: string;
-      user: any;
-    }>('/auth/login', credentials, { skipAuthRefresh: true }),
-  
-  register: (userData: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-    phoneNumber?: string;
-  }) => api.post<{ message: string; userId: string }>('/auth/register', userData, { skipAuthRefresh: true }),
-  
-  logout: () => {
-    const refreshToken = localStorage.getItem('refreshToken');
-    return api.post<{ message: string }>(
-      '/auth/logout', 
-      { refreshToken },
-      { skipAuthRefresh: true }
-    ).finally(() => {
-      // Clear tokens regardless of API call success
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-    });
-  },
-  
-  refreshToken: (refreshToken: string) =>
-    api.post<{ accessToken: string; refreshToken: string }>(
-      '/auth/refresh', 
-      { refreshToken },
-      { skipAuthRefresh: true }
-    ),
-  
-  forgotPassword: (email: string) =>
-    api.post<{ message: string }>('/auth/forgot-password', { email }, { skipAuthRefresh: true }),
-  
-  resetPassword: (token: string, newPassword: string) =>
-    api.post<{ message: string }>(
-      '/auth/reset-password', 
-      { token, newPassword },
-      { skipAuthRefresh: true }
-    ),
-  
-  verifyEmail: (token: string) =>
-    api.post<{ message: string }>(
-      '/auth/verify-email', 
-      { token },
-      { skipAuthRefresh: true }
-    )
-};
-
-// User API
-export const userAPI = {
-  getCurrentUser: () => api.get('/users/me'),
-  getUserById: (id: string) => api.get(`/users/${id}`),
-  updateUser: (id: string, userData: any) => api.put(`/users/${id}`, userData),
-  getAllUsers: () => api.get('/users'),
-  updateProfile: (userData: any) => api.put('/users/profile', userData),
-  changePassword: (currentPassword: string, newPassword: string) => 
-    api.post('/users/change-password', { currentPassword, newPassword }),
-};
 
 // Dashboard API
 export const dashboardAPI = {

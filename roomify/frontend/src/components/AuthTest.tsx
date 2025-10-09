@@ -11,6 +11,7 @@ const AuthTest: React.FC = () => {
   const [username, setUsername] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const { user, login, register, logout, resendVerificationEmail } = useAuth();
   const navigate = useNavigate();
 
@@ -26,7 +27,7 @@ const AuthTest: React.FC = () => {
           navigate('/dashboard');
         }
       } else {
-        const success = await register({ email, password, username, firstName, lastName });
+        const success = await register({ email, password, username, firstName, lastName, acceptTerms });
         if (success) {
           toast.success('Registration successful! Please check your email to verify your account.');
           setIsLogin(true);

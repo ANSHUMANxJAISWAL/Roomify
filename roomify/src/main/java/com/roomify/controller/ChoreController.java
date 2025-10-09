@@ -2,7 +2,6 @@ package com.roomify.controller;
 
 import com.roomify.dto.ChoreDto;
 import com.roomify.service.ChoreService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -14,8 +13,11 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class ChoreController {
 
-    @Autowired
-    private ChoreService choreService;
+    private final ChoreService choreService;
+
+    public ChoreController(ChoreService choreService) {
+        this.choreService = choreService;
+    }
 
     @PostMapping
     @PreAuthorize("hasRole('USER')")

@@ -1,14 +1,13 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import { 
-  DashboardStats, 
-  Expense, 
-  Chore, 
-  Reminder, 
+import {
+  DashboardStats,
+  Expense,
+  Chore,
+  Reminder,
   Notification,
-  Household 
+  Household
 } from '../types'
 import { dashboardAPI } from '../services/api'
-import toast from 'react-hot-toast'
 
 export interface DashboardContextType {
   stats: DashboardStats | null
@@ -76,7 +75,6 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
       ])
     } catch (error) {
       console.error('Failed to initialize dashboard:', error)
-      toast.error('Failed to load dashboard data')
     } finally {
       setLoading(false)
     }

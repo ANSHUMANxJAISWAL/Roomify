@@ -2,8 +2,8 @@ package com.roomify.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.roomify.entity.UserRole;
-import com.roomify.entity.UserStatus;
+import com.roomify.database.entities.UserRole;
+import com.roomify.database.entities.UserStatus;
 
 import java.time.LocalDateTime;
 

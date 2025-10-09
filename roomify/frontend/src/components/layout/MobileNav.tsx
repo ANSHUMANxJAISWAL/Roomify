@@ -1,7 +1,6 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { X, Home, Users, CreditCard, CheckSquare, Bell, Settings, LogOut } from 'lucide-react'
-import { useAuth } from '../../contexts/AuthContext'
+import { X, Home, Users, CreditCard, CheckSquare, Bell, Settings } from 'lucide-react'
 
 interface MobileNavProps {
   open: boolean
@@ -10,20 +9,19 @@ interface MobileNavProps {
 
 const MobileNav: React.FC<MobileNavProps> = ({ open, setOpen }) => {
   const location = useLocation()
-  const { logout } = useAuth()
 
   const navigation = [
-    { name: 'Dashboard', href: '/', icon: Home },
-    { name: 'Household', href: '/household', icon: Users },
+    { name: 'Dashboard', href: '/dashboard', icon: Home },
     { name: 'Expenses', href: '/expenses', icon: CreditCard },
     { name: 'Chores', href: '/chores', icon: CheckSquare },
-    { name: 'Notifications', href: '/notifications', icon: Bell },
+    { name: 'Reminders', href: '/reminders', icon: Bell },
+    { name: 'Roommates', href: '/roommates', icon: Users },
     { name: 'Settings', href: '/settings', icon: Settings },
   ]
 
   const isActive = (href: string) => {
-    if (href === '/') {
-      return location.pathname === '/'
+    if (href === '/dashboard') {
+      return location.pathname === '/dashboard' || location.pathname === '/'
     }
     return location.pathname.startsWith(href)
   }
@@ -35,8 +33,8 @@ const MobileNav: React.FC<MobileNavProps> = ({ open, setOpen }) => {
       <div className="fixed inset-0 z-40">
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setOpen(false)} />
         
-        <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white">
-          <div className="absolute top-0 right-0 -mr-12 pt-2">
+        <div className="relative flex-1 flex flex-col max-w-xs w-full glass backdrop-blur-xl pt-20">
+          <div className="absolute top-20 right-0 -mr-12 pt-2">
             <button
               type="button"
               className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
@@ -63,16 +61,16 @@ const MobileNav: React.FC<MobileNavProps> = ({ open, setOpen }) => {
                     to={item.href}
                     className={`group flex items-center px-2 py-2 text-base font-medium rounded-md transition-colors ${
                       isActive(item.href)
-                        ? 'bg-gray-100 text-gray-900'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ? 'bg-gradient-to-r from-purple-600/20 to-blue-600/20 text-white border border-purple-500/30 shadow-lg shadow-purple-500/10'
+                        : 'text-gray-300 hover:bg-slate-800/50 hover:text-white'
                     }`}
                     onClick={() => setOpen(false)}
                   >
                     <Icon
                       className={`mr-4 h-6 w-6 ${
                         isActive(item.href)
-                          ? 'text-gray-500'
-                          : 'text-gray-400 group-hover:text-gray-500'
+                          ? 'text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]'
+                          : 'text-gray-400 group-hover:text-purple-400 transition-colors duration-200'
                       }`}
                     />
                     {item.name}
@@ -80,20 +78,6 @@ const MobileNav: React.FC<MobileNavProps> = ({ open, setOpen }) => {
                 )
               })}
             </nav>
-          </div>
-          
-          {/* Logout */}
-          <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
-            <button
-              onClick={() => {
-                logout()
-                setOpen(false)
-              }}
-              className="flex items-center w-full px-2 py-2 text-base font-medium text-gray-600 rounded-md hover:bg-gray-50 hover:text-gray-900 transition-colors"
-            >
-              <LogOut className="mr-4 h-6 w-6 text-gray-400" />
-              Logout
-            </button>
           </div>
         </div>
       </div>

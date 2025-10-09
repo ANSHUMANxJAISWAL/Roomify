@@ -2,7 +2,6 @@ package com.roomify.controller;
 
 import com.roomify.dto.ExpenseDto;
 import com.roomify.service.ExpenseService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -14,8 +13,11 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class ExpenseController {
 
-    @Autowired
-    private ExpenseService expenseService;
+    private final ExpenseService expenseService;
+
+    public ExpenseController(ExpenseService expenseService) {
+        this.expenseService = expenseService;
+    }
 
     @PostMapping
     @PreAuthorize("hasRole('USER')")

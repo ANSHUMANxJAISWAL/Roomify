@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
-@EntityScan("com.roomify.test")
-@EnableJpaRepositories("com.roomify.test")
+@EntityScan({"com.roomify.test", "com.roomify.database.entities"})
+@EnableJpaRepositories({"com.roomify.test", "com.roomify.database.repositories"})
 public class TestConfig {
 }

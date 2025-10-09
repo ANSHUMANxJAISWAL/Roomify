@@ -73,7 +73,18 @@ const Register: React.FC = () => {
     try {
       const success = await register(formData)
       if (success) {
-        navigate('/onboarding')
+        // Clear form data
+        setFormData({
+          username: '',
+          email: '',
+          password: '',
+          confirmPassword: '',
+          firstName: '',
+          lastName: '',
+          acceptTerms: false
+        })
+        setErrors({})
+        navigate('/login')
       }
     } finally {
       setLoading(false)

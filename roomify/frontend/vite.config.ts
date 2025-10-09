@@ -26,6 +26,23 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: 'dist',
       sourcemap: true,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // Vendor chunks
+            'vendor-react': ['react', 'react-dom'],
+            'vendor-router': ['react-router-dom'],
+            'vendor-ui': ['framer-motion', 'lucide-react', 'sonner'],
+            'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
+            'vendor-charts': ['recharts'],
+            // Supabase and auth
+            'vendor-supabase': ['@supabase/supabase-js', '@supabase/auth-helpers-react'],
+            // Utilities
+            'vendor-utils': ['axios', 'clsx', 'date-fns', 'tailwind-merge'],
+          },
+        },
+      },
+      chunkSizeWarningLimit: 600, // Increase warning limit to 600KB
     },
     define: {
       'process.env': {
