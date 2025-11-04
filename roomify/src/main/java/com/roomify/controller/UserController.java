@@ -1,56 +1,62 @@
 package com.roomify.controller;
 
-import com.roomify.dto.UserDto;
+import com.roomify.dto.UserCreateRequest;
+import com.roomify.dto.UserResponse;
+import com.roomify.dto.UserUpdateRequest;
 import com.roomify.service.UserService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class UserController {
-
     private final UserService userService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
-
-    @GetMapping("/me")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<UserDto> getCurrentUser() {
-        UserDto user = userService.getCurrentUser();
-        return ResponseEntity.ok(user);
-    }
-
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<UserDto> getUserById(@PathVariable String id) {
-        UserDto user = userService.getUserById(id);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<UserResponse> getUser(@PathVariable String id) {
+        return ResponseEntity.ok(userService.getUserById(id));
     }
 
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserDto>> getAllUsers() {
-        List<UserDto> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public UserResponse createUser(@Valid @RequestBody UserCreateRequest request) {
+        return userService.createUser(request);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<UserDto> updateUser(@PathVariable String id, @RequestBody UserDto userDto) {
-        UserDto updatedUser = userService.updateUser(id, userDto);
-        return ResponseEntity.ok(updatedUser);
+    public UserResponse updateUser(
+            @PathVariable String id,
+            @Valid @RequestBody UserUpdateRequest request) {
+        return userService.updateUser(id, request);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteUser(@PathVariable String id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUser(@PathVariable String id) {
         userService.deleteUser(id);
-        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping
+    public List<UserResponse> getAllUsers() {
+        return userService.getAllUsers();
+    }
+
+    @GetMapping("/email/{email}")
+    public ResponseEntity<UserResponse> getUserByEmail(@PathVariable String email) {
+        return ResponseEntity.ok(userService.getUserByEmail(email));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<UserResponse>> searchUsers(
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String name) {
+        return ResponseEntity.ok(userService.searchUsers(email, name));
     }
 }

@@ -1,142 +1,184 @@
 package com.roomify.service.impl;
 
-import com.roomify.dto.UserDto;
-import com.roomify.dto.RegisterRequest;
 import com.roomify.database.entities.User;
 import com.roomify.database.entities.UserRole;
 import com.roomify.database.entities.UserStatus;
-import com.roomify.exception.ResourceAlreadyExistsException;
-import com.roomify.exception.ResourceNotFoundException;
 import com.roomify.database.repositories.UserRepository;
+import com.roomify.dto.UserCreateRequest;
+import com.roomify.dto.UserResponse;
+import com.roomify.dto.UserUpdateRequest;
+import com.roomify.exception.BadRequestException;
+import com.roomify.exception.ResourceNotFoundException;
 import com.roomify.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import lombok.RequiredArgsConstructor;
+// import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import jakarta.annotation.PostConstruct;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
 
     @Override
-    public UserDto registerUser(RegisterRequest request) {
-        if (existsByEmail(request.getEmail())) {
-            throw new ResourceAlreadyExistsException("User", "email", request.getEmail());
+    @Transactional(readOnly = true)
+    public UserResponse getUserById(String id) {
+        User user = userRepository.findActiveById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        return mapToResponse(user);
+    }
+
+    @Override
+    @Transactional
+    public UserResponse createUser(UserCreateRequest request) {
+        if (userRepository.existsByEmail(request.email)) {
+            throw new BadRequestException("Email already in use");
         }
 
-        com.roomify.database.entities.User user = new User();
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        user.setPhoneNumber(request.getPhoneNumber());
-        // Username is handled by the email field in User entity
+        User user = new User();
+        user.setEmail(request.email);
+        user.setPassword(request.password); // Store password as plain text for basic project
+        user.setFirstName(request.firstName);
+        user.setLastName(request.lastName);
         user.setRole(UserRole.USER);
-        user.setStatus(com.roomify.database.entities.UserStatus.ACTIVE);
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
+        user.setStatus(UserStatus.ACTIVE);
 
         User savedUser = userRepository.save(user);
-        return convertToDto(savedUser);
+        System.out.println("Created new user with email: " + savedUser.getEmail());
+        return mapToResponse(savedUser);
     }
 
     @Override
-    public UserDto getUserById(String id) {
-        com.roomify.database.entities.User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
-        return convertToDto(user);
-    }
+    @Transactional
+    public UserResponse updateUser(String id, UserUpdateRequest request) {
+        User user = userRepository.findActiveById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-    @Override
-    public UserDto getUserByEmail(String email) {
-        com.roomify.database.entities.User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
-        return convertToDto(user);
-    }
-
-    @Override
-    public List<UserDto> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public UserDto updateUser(String id, UserDto userDto) {
-        com.roomify.database.entities.User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
-
-        user.setFirstName(userDto.getFirstName());
-        user.setLastName(userDto.getLastName());
-        user.setPhoneNumber(userDto.getPhoneNumber());
-        user.setProfilePicture(userDto.getProfilePicture());
-        user.setUpdatedAt(LocalDateTime.now());
+        if (request.firstName != null) {
+            user.setFirstName(request.firstName);
+        }
+        if (request.lastName != null) {
+            user.setLastName(request.lastName);
+        }
 
         User updatedUser = userRepository.save(user);
-        return convertToDto(updatedUser);
+        System.out.println("Updated user with id: " + id);
+        return mapToResponse(updatedUser);
     }
 
     @Override
+    @Transactional
     public void deleteUser(String id) {
-        if (!userRepository.existsById(id)) {
-            throw new ResourceNotFoundException("User", "id", id);
+        User user = userRepository.findActiveById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        user.setDeletedAt(java.time.LocalDateTime.now());
+        userRepository.save(user);
+        System.out.println("Soft deleted user with id: " + id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponse getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+
+        return mapToResponse(user);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+            .filter(user -> user.getDeletedAt() == null)
+            .map(this::mapToResponse)
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponse> searchUsers(String email, String name) {
+        if (email != null && !email.trim().isEmpty()) {
+            return userRepository.findByEmailContainingIgnoreCase(email).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+        } else if (name != null && !name.trim().isEmpty()) {
+            return userRepository.findByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(name, name).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
         }
-        userRepository.deleteById(id);
+        return List.of();
     }
 
-    @Override
-    public boolean existsByEmail(String email) {
-        return userRepository.existsByEmail(email);
-    }
+    @PostConstruct
+    @Transactional
+    public void createSampleUsers() {
+        try {
+            if (userRepository.count() == 0) {
+                System.out.println("Creating sample users...");
 
-    @Override
-    public UserDto getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return getUserByEmail(email);
-    }
+                User adminUser = new User();
+                adminUser.setEmail("admin@roomify.com");
+                adminUser.setPassword("admin123");
+                adminUser.setFirstName("Admin");
+                adminUser.setLastName("User");
+                adminUser.setRole(UserRole.ADMIN);
+                adminUser.setStatus(UserStatus.ACTIVE);
 
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        com.roomify.database.entities.User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-        
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail())
-                .password(user.getPassword())
-                .roles(user.getRole().name())
-                .build();
-    }
+                User johnUser = new User();
+                johnUser.setEmail("john@roomify.com");
+                johnUser.setPassword("john123");
+                johnUser.setFirstName("John");
+                johnUser.setLastName("Doe");
+                johnUser.setRole(UserRole.USER);
+                johnUser.setStatus(UserStatus.ACTIVE);
 
-    private UserDto convertToDto(com.roomify.database.entities.User user) {
-        UserDto dto = new UserDto();
-        dto.setId(user.getId());
-        dto.setEmail(user.getEmail());
-        dto.setFirstName(user.getFirstName());
-        dto.setLastName(user.getLastName());
-        dto.setPhoneNumber(user.getPhoneNumber());
-        dto.setRole(user.getRole());
-        dto.setStatus(user.getStatus());
-        dto.setProfilePicture(user.getProfilePicture());
-        dto.setCreatedAt(user.getCreatedAt());
-        dto.setUpdatedAt(user.getUpdatedAt());
-        
-        if (user.getHousehold() != null) {
-            dto.setHouseholdId(user.getHousehold().getId());
-            dto.setHouseholdName(user.getHousehold().getName());
+                User janeUser = new User();
+                janeUser.setEmail("jane@roomify.com");
+                janeUser.setPassword("jane123");
+                janeUser.setFirstName("Jane");
+                janeUser.setLastName("Smith");
+                janeUser.setRole(UserRole.USER);
+                janeUser.setStatus(UserStatus.ACTIVE);
+
+                User guestUser = new User();
+                guestUser.setEmail("guest@roomify.com");
+                guestUser.setPassword("guest123");
+                guestUser.setFirstName("Guest");
+                guestUser.setLastName("User");
+                guestUser.setRole(UserRole.USER);
+                guestUser.setStatus(UserStatus.ACTIVE);
+
+                userRepository.save(adminUser);
+                userRepository.save(johnUser);
+                userRepository.save(janeUser);
+                userRepository.save(guestUser);
+
+                System.out.println("Sample users created successfully");
+            } else {
+                System.out.println("Users already exist, skipping sample user creation");
+            }
+        } catch (Exception e) {
+            System.err.println("Error creating sample users: " + e.getMessage());
         }
-        
-        return dto;
+    }
+
+    private UserResponse mapToResponse(User user) {
+        UserResponse response = new UserResponse();
+        response.id = user.getId();
+        response.email = user.getEmail();
+        response.firstName = user.getFirstName();
+        response.lastName = user.getLastName();
+        response.role = user.getRole();
+        response.status = user.getStatus();
+        response.createdAt = user.getCreatedAt();
+        response.updatedAt = user.getUpdatedAt();
+        return response;
     }
 }
-

@@ -7,7 +7,5 @@ public enum ChoreFrequency {
     MONTHLY,
     QUARTERLY,
     YEARLY,
-    ONE_TIME,
-    CUSTOM
+    ONE_TIME
 }
-

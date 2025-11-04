@@ -6,4 +6,3 @@ public enum HouseholdStatus {
     SUSPENDED,
     ARCHIVED
 }
-

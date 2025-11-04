@@ -1,262 +1,282 @@
-import React, { useState } from 'react'
-import { Plus, Edit, Trash2, CheckSquare, CheckCircle, Clock, AlertTriangle, User, Calendar } from 'lucide-react'
-import { useDashboard } from '../contexts/DashboardContext'
-import { formatDate } from '../utils/formatters'
-import { choreAPI } from '../services/api'
-import { Chore } from '../types'
+import React, { useState } from 'react';
+import { CheckSquare, Plus, Calendar, User, AlertCircle, CheckCircle, Clock, Filter } from 'lucide-react';
+
+interface Chore {
+  id: string;
+  title: string;
+  description: string;
+  assignedTo: string;
+  priority: 'LOW' | 'MEDIUM' | 'HIGH';
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'OVERDUE';
+  dueDate: string;
+  frequency: 'ONCE' | 'DAILY' | 'WEEKLY' | 'MONTHLY';
+  household: string;
+}
 
 const Chores: React.FC = () => {
-  const { chores, loading } = useDashboard()
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [editingChore, setEditingChore] = useState<Chore | null>(null)
-  const [filterStatus, setFilterStatus] = useState('ALL')
-  const [filterPriority, setFilterPriority] = useState('ALL')
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    assignedTo: '',
-    dueDate: '',
-    priority: 'MEDIUM' as 'LOW' | 'MEDIUM' | 'HIGH',
-    frequency: 'WEEKLY' as 'ONE_TIME' | 'DAILY' | 'WEEKLY' | 'MONTHLY'
-  })
+  const [filter, setFilter] = useState<string>('ALL');
+  const [chores, setChores] = useState<Chore[]>([
+    {
+      id: '1',
+      title: 'Clean Kitchen',
+      description: 'Wash dishes, wipe counters, and mop floor',
+      assignedTo: 'John Doe',
+      priority: 'HIGH',
+      status: 'IN_PROGRESS',
+      dueDate: '2024-10-30',
+      frequency: 'DAILY',
+      household: 'Downtown Apartment',
+    },
+    {
+      id: '2',
+      title: 'Take Out Trash',
+      description: 'Empty all trash bins and take to curb',
+      assignedTo: 'Jane Smith',
+      priority: 'MEDIUM',
+      status: 'PENDING',
+      dueDate: '2024-10-29',
+      frequency: 'WEEKLY',
+      household: 'Downtown Apartment',
+    },
+    {
+      id: '3',
+      title: 'Vacuum Living Room',
+      description: 'Vacuum carpets and clean under furniture',
+      assignedTo: 'Admin User',
+      priority: 'MEDIUM',
+      status: 'COMPLETED',
+      dueDate: '2024-10-28',
+      frequency: 'WEEKLY',
+      household: 'Downtown Apartment',
+    },
+    {
+      id: '4',
+      title: 'Buy Groceries',
+      description: 'Get essentials for the week',
+      assignedTo: 'Guest User',
+      priority: 'HIGH',
+      status: 'OVERDUE',
+      dueDate: '2024-10-27',
+      frequency: 'WEEKLY',
+      household: 'Downtown Apartment',
+    },
+  ]);
 
-  // Submit handler
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    try {
-      const choreData = {
-        ...formData,
-        assignedToId: 'demo-user-id', // Demo user ID since auth is removed
-        householdId: 'demo-household-id' // Demo household ID since auth is removed
-      }
-
-      if (editingChore) {
-        await choreAPI.updateChore(editingChore.id, choreData)
-      } else {
-        await choreAPI.createChore(choreData)
-      }
-      setShowCreateModal(false)
-      setEditingChore(null)
-      setFormData({ ...formData, title: '', description: '', assignedTo: '', dueDate: '', priority: 'MEDIUM', frequency: 'WEEKLY' })
-    } catch (error) {
-      console.error('Error saving chore:', error)
-    }
-  }
-
-  // Status change handler (stub)
-  const handleStatusChange = async (choreId: string, newStatus: string) => {
-    // Implement status update via API
-    await choreAPI.updateChore(choreId, { status: newStatus })
-  }
-
-  // Delete handler
-  const handleDelete = async (choreId: string) => {
-    await choreAPI.deleteChore(choreId)
-  }
-
-  // Filtering chores
-  const filteredChores = (chores || []).filter(chore => {
-    if (filterStatus !== 'ALL' && chore.status !== filterStatus) return false
-    if (filterPriority !== 'ALL' && chore.priority !== filterPriority) return false
-    return true
-  })
-
-  // Priority color helper
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'HIGH': return 'text-red-600 bg-red-100'
-      case 'MEDIUM': return 'text-yellow-600 bg-yellow-100'
-      case 'LOW': return 'text-green-600 bg-green-100'
-      default: return 'text-gray-600 bg-gray-100'
-    }
-  }
-
-  // Status color helper
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'COMPLETED': return 'text-green-600 bg-green-100'
-      case 'IN_PROGRESS': return 'text-blue-600 bg-blue-100'
-      case 'PENDING': return 'text-yellow-600 bg-yellow-100'
-      default: return 'text-gray-600 bg-gray-100'
-    }
-  }
-
-  // Status icon helper
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'COMPLETED': return <CheckCircle className="inline" size={16} />
-      case 'IN_PROGRESS': return <Clock className="inline" size={16} />
-      case 'PENDING': return <AlertTriangle className="inline" size={16} />
-      default: return null
-    }
-  }
-
-  // Loading state
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400"></div>
-      </div>
+  const handleMarkComplete = (choreId: string) => {
+    setChores(prevChores =>
+      prevChores.map(chore =>
+        chore.id === choreId ? { ...chore, status: 'COMPLETED' as const } : chore
+      )
     );
-  }
+    alert('Chore marked as completed! 🎉');
+  };
+
+  const getPriorityColor = (priority: string) => {
+    const colors: { [key: string]: string } = {
+      LOW: 'from-blue-500/20 to-cyan-500/20',
+      MEDIUM: 'from-yellow-500/20 to-orange-500/20',
+      HIGH: 'from-red-500/20 to-pink-500/20',
+    };
+    return colors[priority] || 'from-gray-500/20 to-slate-500/20';
+  };
+
+  const getPriorityBadge = (priority: string) => {
+    const badges: { [key: string]: string } = {
+      LOW: 'badge-info',
+      MEDIUM: 'badge-warning',
+      HIGH: 'badge-danger',
+    };
+    return badges[priority] || 'badge-info';
+  };
+
+  const getStatusBadge = (status: string) => {
+    const badges: { [key: string]: string } = {
+      PENDING: 'badge-warning',
+      IN_PROGRESS: 'badge-info',
+      COMPLETED: 'badge-success',
+      OVERDUE: 'badge-danger',
+    };
+    return badges[status] || 'badge-info';
+  };
+
+  const getStatusIcon = (status: string) => {
+    const icons: { [key: string]: any } = {
+      PENDING: Clock,
+      IN_PROGRESS: AlertCircle,
+      COMPLETED: CheckCircle,
+      OVERDUE: AlertCircle,
+    };
+    return icons[status] || Clock;
+  };
+
+  const statusCounts = {
+    all: chores.length,
+    pending: chores.filter(c => c.status === 'PENDING').length,
+    in_progress: chores.filter(c => c.status === 'IN_PROGRESS').length,
+    completed: chores.filter(c => c.status === 'COMPLETED').length,
+    overdue: chores.filter(c => c.status === 'OVERDUE').length,
+  };
+
+  const filteredChores = filter === 'ALL' 
+    ? chores 
+    : chores.filter(chore => chore.status === filter);
 
   return (
-    <div>
+    <div className="space-y-6 animate-fade-in">
       {/* Page Header */}
-      <div className="header flex justify-between items-center mb-6">
-        <h1 className="text-4xl font-bold text-gradient-heading drop-shadow-lg">Chores</h1>
-        <button className="btn-primary" onClick={() => setShowCreateModal(true)}>
-          <Plus className="h-4 w-4 mr-2" /> Assign Chore
-        </button>
-      </div>
-
-      {/* Filters */}
-      <div className="filters flex gap-3 mb-6">
-        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="input-field">
-          <option value="ALL">All Statuses</option>
-          <option value="PENDING">Pending</option>
-          <option value="IN_PROGRESS">In Progress</option>
-          <option value="COMPLETED">Completed</option>
-        </select>
-        <select value={filterPriority} onChange={e => setFilterPriority(e.target.value)} className="input-field">
-          <option value="ALL">All Priorities</option>
-          <option value="HIGH">High</option>
-          <option value="MEDIUM">Medium</option>
-          <option value="LOW">Low</option>
-        </select>
-      </div>
-
-      {/* Chores Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredChores.map((chore) => (
-          <div key={chore.id} className="card hover:bg-slate-900/60 transition-all duration-300 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-2">
-                <span className="text-gray-300">{getStatusIcon(chore.status)}</span>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(chore.status)}`}>
-                  {chore.status}
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <button onClick={() => setEditingChore(chore)} className="text-gray-300 hover:text-purple-400 transition-colors duration-200">
-                  <Edit className="h-4 w-4" />
-                </button>
-                <button onClick={() => handleDelete(chore.id)} className="text-gray-300 hover:text-red-400 transition-colors duration-200">
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-
-            <h3 className="font-semibold text-white mb-2 text-lg">{chore.title}</h3>
-            <p className="text-gray-300 text-sm mb-4">{chore.description}</p>
-
-            <div className="space-y-2 text-sm text-gray-300 mb-4">
-              <div className="flex items-center">
-                <User className="h-4 w-4 mr-2" />
-                Assigned to: {typeof chore.assignedTo === 'object'
-                  ? `${chore.assignedTo.firstName} ${chore.assignedTo.lastName}`
-                  : chore.assignedTo || 'Unassigned'}
-              </div>
-              <div className="flex items-center">
-                <Calendar className="h-4 w-4 mr-2" />
-                Due: {formatDate(chore.dueDate)}
-              </div>
-            </div>
-
-            <div className="flex space-x-2">
-              {chore.status !== 'COMPLETED' && (
-                <button
-                  onClick={() => handleStatusChange(chore.id, 'COMPLETED')}
-                  className="btn-secondary text-sm flex-1"
-                >
-                  Mark Complete
-                </button>
-              )}
-              {chore.status === 'PENDING' && (
-                <button
-                  onClick={() => handleStatusChange(chore.id, 'IN_PROGRESS')}
-                  className="btn-outline text-sm flex-1"
-                >
-                  Start
-                </button>
-              )}
-            </div>
+      <div className="card glow-blue">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-bold text-gradient-heading mb-2">Chores Management</h1>
+            <p className="text-gray-400">Track and assign household chores</p>
           </div>
-        ))}
-        {filteredChores.length === 0 && (
-          <div className="col-span-full text-center py-12">
-            <CheckSquare className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-300">No chores found! Create your first chore to get started!</p>
-          </div>
-        )}
+          <button className="btn-primary">
+            <Plus className="h-5 w-5 mr-2" />
+            Create Chore
+          </button>
+        </div>
       </div>
 
-      {/* Create/Edit Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="glass backdrop-blur-xl border border-slate-700/30 rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <h2 className="text-xl font-semibold mb-4 text-white">
-              {editingChore ? 'Edit Chore' : 'Assign New Chore'}
-            </h2>
-            <form onSubmit={handleSubmit}>
-              <input
-                value={formData.title}
-                onChange={e => setFormData({...formData, title: e.target.value})}
-                className="input-field"
-                required
-                placeholder="Title"
-              />
-              <textarea
-                value={formData.description}
-                onChange={e => setFormData({...formData, description: e.target.value})}
-                className="input-field"
-                rows={3}
-                placeholder="Description"
-              />
-              <input
-                value={formData.assignedTo}
-                onChange={e => setFormData({...formData, assignedTo: e.target.value})}
-                className="input-field"
-                required
-                placeholder="Assigned To"
-              />
-              <input
-                type="date"
-                value={formData.dueDate}
-                onChange={e => setFormData({...formData, dueDate: e.target.value})}
-                className="input-field"
-                required
-                placeholder="Due Date"
-              />
-              <select
-                value={formData.priority}
-                onChange={e => setFormData({...formData, priority: e.target.value as any})}
-                className="select-field"
-              >
-                <option value="LOW">Low</option>
-                <option value="MEDIUM">Medium</option>
-                <option value="HIGH">High</option>
-              </select>
-              <select
-                value={formData.frequency}
-                onChange={e => setFormData({...formData, frequency: e.target.value as any})}
-                className="select-field"
-              >
-                <option value="ONE_TIME">One Time</option>
-                <option value="DAILY">Daily</option>
-                <option value="WEEKLY">Weekly</option>
-                <option value="MONTHLY">Monthly</option>
-              </select>
-              <div className="flex gap-2 mt-3">
-                <button type="submit" className="btn-primary flex-1">{editingChore ? 'Update' : 'Create'}</button>
-                <button type="button" onClick={() => { setShowCreateModal(false); setEditingChore(null); }} className="btn-outline flex-1">Cancel</button>
-              </div>
-            </form>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="card text-center cursor-pointer hover:scale-105 transition-all" onClick={() => setFilter('ALL')}>
+          <CheckSquare className="h-8 w-8 text-purple-400 mx-auto mb-2" />
+          <p className="text-2xl font-bold text-white">{statusCounts.all}</p>
+          <p className="text-sm text-gray-400">Total</p>
+        </div>
+        <div className="card text-center cursor-pointer hover:scale-105 transition-all" onClick={() => setFilter('PENDING')}>
+          <Clock className="h-8 w-8 text-yellow-400 mx-auto mb-2" />
+          <p className="text-2xl font-bold text-white">{statusCounts.pending}</p>
+          <p className="text-sm text-gray-400">Pending</p>
+        </div>
+        <div className="card text-center cursor-pointer hover:scale-105 transition-all" onClick={() => setFilter('IN_PROGRESS')}>
+          <AlertCircle className="h-8 w-8 text-blue-400 mx-auto mb-2" />
+          <p className="text-2xl font-bold text-white">{statusCounts.in_progress}</p>
+          <p className="text-sm text-gray-400">In Progress</p>
+        </div>
+        <div className="card text-center cursor-pointer hover:scale-105 transition-all" onClick={() => setFilter('COMPLETED')}>
+          <CheckCircle className="h-8 w-8 text-emerald-400 mx-auto mb-2" />
+          <p className="text-2xl font-bold text-white">{statusCounts.completed}</p>
+          <p className="text-sm text-gray-400">Completed</p>
+        </div>
+        <div className="card text-center cursor-pointer hover:scale-105 transition-all" onClick={() => setFilter('OVERDUE')}>
+          <AlertCircle className="h-8 w-8 text-red-400 mx-auto mb-2" />
+          <p className="text-2xl font-bold text-white">{statusCounts.overdue}</p>
+          <p className="text-sm text-gray-400">Overdue</p>
+        </div>
+      </div>
+
+      {/* Filter Indicator */}
+      {filter !== 'ALL' && (
+        <div className="card">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Filter className="h-5 w-5 text-purple-400" />
+              <span className="text-gray-300">Showing: <span className="text-white font-bold">{filter}</span> chores</span>
+            </div>
+            <button onClick={() => setFilter('ALL')} className="btn-outline text-sm py-2">
+              Clear Filter
+            </button>
           </div>
         </div>
       )}
-    </div>
-  )
-}
 
-export default Chores
+      {/* Chores Grid */}
+      {filteredChores.length === 0 ? (
+        <div className="card text-center py-12">
+          <CheckSquare className="h-24 w-24 text-gray-400 mx-auto mb-4 opacity-50" />
+          <h3 className="text-xl font-medium text-gray-200 mb-2">No chores found</h3>
+          <p className="text-gray-400 mb-6">
+            {filter !== 'ALL' ? `No ${filter.toLowerCase()} chores` : 'Create your first chore to get started'}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredChores.map((chore) => {
+            const StatusIcon = getStatusIcon(chore.status);
+            const isOverdue = chore.status === 'OVERDUE';
+            const isCompleted = chore.status === 'COMPLETED';
+            
+            return (
+              <div 
+                key={chore.id} 
+                className={`card ${isOverdue ? 'glow-pink' : isCompleted ? 'hover:shadow-emerald-500/20' : 'glow-purple'} transform hover:scale-105 transition-all duration-300`}
+              >
+                {/* Card Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-3 bg-gradient-to-br ${getPriorityColor(chore.priority)} rounded-xl`}>
+                      <CheckSquare className="h-6 w-6 text-purple-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white">{chore.title}</h3>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <span className={`badge ${getPriorityBadge(chore.priority)}`}>
+                          {chore.priority}
+                        </span>
+                        <span className={`badge ${getStatusBadge(chore.status)}`}>
+                          {chore.status}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <StatusIcon className={`h-6 w-6 ${isOverdue ? 'text-red-400' : isCompleted ? 'text-emerald-400' : 'text-blue-400'}`} />
+                </div>
+
+                {/* Description */}
+                <p className="text-sm text-gray-400 mb-4">{chore.description}</p>
+
+                {/* Details */}
+                <div className="space-y-3 bg-slate-800/30 rounded-xl p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2 text-sm text-gray-400">
+                      <User className="h-4 w-4" />
+                      <span>Assigned to</span>
+                    </div>
+                    <span className="text-sm text-white font-medium">{chore.assignedTo}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2 text-sm text-gray-400">
+                      <Calendar className="h-4 w-4" />
+                      <span>Due Date</span>
+                    </div>
+                    <span className={`text-sm font-medium ${isOverdue ? 'text-red-400' : 'text-white'}`}>
+                      {new Date(chore.dueDate).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-400">Frequency</span>
+                    <span className="text-xs px-3 py-1 bg-slate-700/50 rounded-full text-gray-300">
+                      {chore.frequency}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center space-x-2 mt-4 pt-4 border-t border-slate-700/50">
+                  {!isCompleted && (
+                    <button 
+                      onClick={() => handleMarkComplete(chore.id)} 
+                      className="flex-1 btn-primary text-sm py-2"
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Mark Complete
+                    </button>
+                  )}
+                  {isCompleted && (
+                    <button className="flex-1 btn-secondary text-sm py-2 cursor-default">
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Completed ✓
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Chores;

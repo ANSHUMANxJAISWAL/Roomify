@@ -6,4 +6,3 @@ public enum ChorePriority {
     HIGH,
     URGENT
 }
-

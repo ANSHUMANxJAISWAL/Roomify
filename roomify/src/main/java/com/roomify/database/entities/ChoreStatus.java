@@ -8,4 +8,3 @@ public enum ChoreStatus {
     CANCELLED,
     OVERDUE
 }
-

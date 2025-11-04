@@ -1,24 +1,24 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Home, Users, CreditCard, CheckSquare, Bell, Settings } from 'lucide-react'
+import { LayoutDashboard, Users, Home, DollarSign, CheckSquare, Bell, Settings } from 'lucide-react'
 
 const Sidebar: React.FC = () => {
   const location = useLocation()
 
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: Home },
-    { name: 'Expenses', href: '/expenses', icon: CreditCard },
+    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+    { name: 'Users', href: '/users', icon: Users },
+    { name: 'Households', href: '/households', icon: Home },
+    { name: 'Expenses', href: '/expenses', icon: DollarSign },
     { name: 'Chores', href: '/chores', icon: CheckSquare },
-    { name: 'Reminders', href: '/reminders', icon: Bell },
-    { name: 'Roommates', href: '/roommates', icon: Users },
-    { name: 'Settings', href: '/settings', icon: Settings },
+    { name: 'Notifications', href: '/notifications', icon: Bell },
   ]
 
   const isActive = (href: string) => {
-    if (href === '/dashboard') {
-      return location.pathname === '/dashboard' || location.pathname === '/'
+    if (href === '/') {
+      return location.pathname === '/';
     }
-    return location.pathname.startsWith(href)
+    return location.pathname.startsWith(href);
   }
 
   return (

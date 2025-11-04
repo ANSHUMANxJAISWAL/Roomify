@@ -1,366 +1,231 @@
-import React, { useState, useMemo } from 'react';
-import { 
-  Edit, 
-  Trash2, 
-  Users, 
-  Calendar, 
-  User, 
-  Plus, 
-  DollarSign,
-  Receipt,
-  Clock,
-  AlertTriangle
-} from 'lucide-react';
-import { useDashboard } from '../contexts/DashboardContext';
-import { formatCurrency, formatDate } from '../utils/formatters';
-import {
-  Expense,
-  ExpenseStatus, 
-  ExpenseCategory, 
-  ExpenseSplit, 
-  User as UserType
-} from '../types';
+import React, { useState } from 'react';
+import { DollarSign, ShoppingCart, Utensils, Home, Car, Film, Plus, TrendingUp, TrendingDown, Calendar } from 'lucide-react';
 
-// Define our own category enum to avoid modifying the original
-const AppExpenseCategory = {
-  ...ExpenseCategory,
-  SHOPPING: 'SHOPPING',
-  HEALTH: 'HEALTH',
-  EDUCATION: 'EDUCATION'
-} as const;
-
-type AppExpenseCategory = keyof typeof AppExpenseCategory;
-
-// Type for the expense form data
-interface ExpenseFormData {
+interface Expense {
+  id: string;
   title: string;
-  description: string;
   amount: number;
-  category: AppExpenseCategory;
+  category: 'GROCERIES' | 'UTILITIES' | 'RENT' | 'ENTERTAINMENT' | 'TRANSPORTATION' | 'OTHER';
   paidBy: string;
-  householdId: string;
-  tags: string[];
-  splits: ExpenseSplit[];
+  splitAmong: number;
   date: string;
-  status: ExpenseStatus;
-  currency: string;
+  status: 'PAID' | 'PENDING' | 'OVERDUE';
 }
 
-// Initial form state
-const initialFormState: ExpenseFormData = {
-  title: '',
-  description: '',
-  amount: 0,
-  category: 'UTILITIES',
-  paidBy: '',
-  householdId: '',
-  tags: [],
-  splits: [],
-  date: new Date().toISOString().split('T')[0],
-  status: ExpenseStatus.PENDING,
-  currency: 'USD'
-};
-
 const Expenses: React.FC = () => {
-  const { expenses = [] } = useDashboard();
-  const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
-  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  // State for filters
-  const [filterStatus] = useState<ExpenseStatus | 'ALL'>('ALL');
-  const [filterCategory] = useState<AppExpenseCategory | 'ALL'>('ALL');
-  const [formData, setFormData] = useState<ExpenseFormData>(initialFormState);
+  const [filter, setFilter] = useState<string>('ALL');
 
-  // Get all available categories
-  const categories = Object.values(AppExpenseCategory) as AppExpenseCategory[];
+  const mockExpenses: Expense[] = [
+    {
+      id: '1',
+      title: 'Grocery Shopping',
+      amount: 156.50,
+      category: 'GROCERIES',
+      paidBy: 'John Doe',
+      splitAmong: 4,
+      date: '2024-10-28',
+      status: 'PAID',
+    },
+    {
+      id: '2',
+      title: 'Monthly Rent',
+      amount: 2400.00,
+      category: 'RENT',
+      paidBy: 'Jane Smith',
+      splitAmong: 4,
+      date: '2024-10-01',
+      status: 'PAID',
+    },
+    {
+      id: '3',
+      title: 'Electricity Bill',
+      amount: 89.30,
+      category: 'UTILITIES',
+      paidBy: 'Admin User',
+      splitAmong: 4,
+      date: '2024-10-25',
+      status: 'PENDING',
+    },
+    {
+      id: '4',
+      title: 'Movie Night',
+      amount: 52.00,
+      category: 'ENTERTAINMENT',
+      paidBy: 'Guest User',
+      splitAmong: 3,
+      date: '2024-10-26',
+      status: 'PAID',
+    },
+  ];
 
-  // Filter and sort expenses
-  const filteredExpenses = useMemo(() => {
-    return expenses
-      .filter(expense => {
-        const matchesStatus = filterStatus === 'ALL' || expense.status === filterStatus;
-        const expenseCategory = expense.category as AppExpenseCategory;
-        const matchesCategory = filterCategory === 'ALL' || expenseCategory === filterCategory;
-        return matchesStatus && matchesCategory;
-      })
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [expenses, filterStatus, filterCategory]);
-
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      if (editingExpense) {
-        console.log('Updating expense:', formData);
-      } else {
-        console.log('Creating expense:', formData);
-      }
-      setShowCreateModal(false);
-      setEditingExpense(null);
-      setFormData(initialFormState);
-    } catch (error) {
-      console.error('Error submitting expense:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Handle delete
-  const handleDelete = async (expenseId: string) => {
-    if (!window.confirm('Are you sure you want to delete this expense?')) return;
-    setLoading(true);
-    try {
-      console.log('Deleting expense:', expenseId);
-    } catch (error) {
-      console.error('Error deleting expense:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Handle edit
-  const handleEdit = (expense: Expense) => {
-    setEditingExpense(expense);
-    setFormData({
-      title: expense.title,
-      description: expense.description || '',
-      amount: expense.amount,
-      category: expense.category,
-      paidBy: typeof expense.paidBy === 'string' ? expense.paidBy : expense.paidBy.id,
-      householdId: typeof expense.household === 'string' ? expense.household : expense.household.id,
-      tags: expense.tags || [],
-      splits: expense.splits || [],
-      date: expense.date,
-      status: expense.status,
-      currency: expense.currency || 'USD'
-    });
-    setShowCreateModal(true);
-  };
-
-  // Helpers
-  const getStatusColor = (status: ExpenseStatus): string => {
-    switch (status) {
-      case ExpenseStatus.SETTLED:
-        return 'bg-green-100 text-green-800';
-      case ExpenseStatus.PENDING:
-        return 'bg-yellow-100 text-yellow-800';
-      case ExpenseStatus.CANCELLED:
-        return 'bg-red-100 text-red-800';
-      case ExpenseStatus.DISPUTED:
-        return 'bg-orange-100 text-orange-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getCategoryColor = (category: AppExpenseCategory): string => {
-    const colors: Record<string, string> = {
-      FOOD: 'bg-blue-100 text-blue-800',
-      UTILITIES: 'bg-purple-100 text-purple-800',
-      RENT: 'bg-indigo-100 text-indigo-800',
-      TRANSPORTATION: 'bg-yellow-100 text-yellow-800',
-      ENTERTAINMENT: 'bg-pink-100 text-pink-800',
-      SHOPPING: 'bg-green-100 text-green-800',
-      HEALTH: 'bg-red-100 text-red-800',
-      EDUCATION: 'bg-teal-100 text-teal-800',
-      OTHER: 'bg-gray-100 text-gray-800'
+  const getCategoryIcon = (category: string) => {
+    const icons: { [key: string]: any } = {
+      GROCERIES: ShoppingCart,
+      UTILITIES: Home,
+      RENT: Home,
+      ENTERTAINMENT: Film,
+      TRANSPORTATION: Car,
+      OTHER: DollarSign,
     };
-    return colors[category] || colors.OTHER;
+    return icons[category] || DollarSign;
   };
 
-  // Stats
-  const totalExpenses = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
-  const pendingExpenses = filteredExpenses.filter(e => e.status === ExpenseStatus.PENDING);
-  const overdueExpenses = filteredExpenses.filter(() => false); // placeholder
+  const getCategoryColor = (category: string) => {
+    const colors: { [key: string]: string } = {
+      GROCERIES: 'from-emerald-500/20 to-teal-500/20',
+      UTILITIES: 'from-yellow-500/20 to-orange-500/20',
+      RENT: 'from-blue-500/20 to-cyan-500/20',
+      ENTERTAINMENT: 'from-pink-500/20 to-purple-500/20',
+      TRANSPORTATION: 'from-indigo-500/20 to-purple-500/20',
+      OTHER: 'from-gray-500/20 to-slate-500/20',
+    };
+    return colors[category] || 'from-gray-500/20 to-slate-500/20';
+  };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    );
-  }
+  const getCategoryIconColor = (category: string) => {
+    const colors: { [key: string]: string } = {
+      GROCERIES: 'text-emerald-400',
+      UTILITIES: 'text-yellow-400',
+      RENT: 'text-blue-400',
+      ENTERTAINMENT: 'text-pink-400',
+      TRANSPORTATION: 'text-indigo-400',
+      OTHER: 'text-gray-400',
+    };
+    return colors[category] || 'text-gray-400';
+  };
+
+  const totalExpenses = mockExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+  const yourShare = mockExpenses.reduce((sum, exp) => sum + (exp.amount / exp.splitAmong), 0);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gradient-heading drop-shadow-lg">Expenses</h1>
-          <p className="text-gray-300 mt-2">Manage and track shared household expenses.</p>
-        </div>
-        <button onClick={() => setShowCreateModal(true)} className="btn-primary">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Expense
-        </button>
-      </div>
-
-      {/* Stats */}
+    <div className="space-y-6 animate-fade-in">
+      {/* Page Header with Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="card">
-          <div className="flex items-center">
-            <div className="p-3 bg-blue-100 rounded-lg">
-              <DollarSign className="h-6 w-6 text-blue-600" />
+        <div className="card glow-blue md:col-span-2">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-gradient-heading mb-2">Expenses</h1>
+              <p className="text-gray-400">Track and manage shared expenses</p>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-300">Total Expenses</p>
-              <p className="text-2xl font-bold text-white">{formatCurrency(totalExpenses)}</p>
-            </div>
+            <button className="btn-primary">
+              <Plus className="h-5 w-5 mr-2" />
+              Add Expense
+            </button>
           </div>
         </div>
-        <div className="card">
-          <div className="flex items-center">
-            <div className="p-3 bg-yellow-100 rounded-lg">
-              <Clock className="h-6 w-6 text-yellow-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-300">Pending</p>
-              <p className="text-2xl font-bold text-white">{pendingExpenses.length}</p>
-            </div>
+
+        <div className="card glow-purple">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-gray-400">Your Share</span>
+            <TrendingUp className="h-5 w-5 text-purple-400" />
           </div>
-        </div>
-        <div className="card">
-          <div className="flex items-center">
-            <div className="p-3 bg-red-100 rounded-lg">
-              <AlertTriangle className="h-6 w-6 text-red-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-300">Overdue</p>
-              <p className="text-2xl font-bold text-white">{overdueExpenses.length}</p>
-            </div>
-          </div>
+          <p className="text-3xl font-bold text-white">${yourShare.toFixed(2)}</p>
+          <p className="text-sm text-gray-400 mt-1">of ${totalExpenses.toFixed(2)} total</p>
         </div>
       </div>
 
-      {/* Expenses List/Grid + Filters (you can plug your grid/list rendering here) */}
-
-      {filteredExpenses.length === 0 && (
-        <div className="text-center py-12">
-          <Receipt className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-white mb-2">No expenses found</h3>
-          <p className="text-gray-300">Create your first expense to get started!</p>
+      {/* Category Filter */}
+      <div className="card">
+        <div className="flex items-center space-x-3 overflow-x-auto pb-2">
+          {['ALL', 'GROCERIES', 'UTILITIES', 'RENT', 'ENTERTAINMENT', 'TRANSPORTATION', 'OTHER'].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setFilter(cat)}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                filter === cat
+                  ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg'
+                  : 'bg-slate-800/50 text-gray-400 hover:text-white hover:bg-slate-700/50'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
-      )}
+      </div>
 
-      {/* Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="glass backdrop-blur-xl border border-slate-700/30 rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <h2 className="text-xl font-semibold mb-4 text-white">
-              {editingExpense ? 'Edit Expense' : 'Add New Expense'}
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="title" className="form-label">
-                  Title
-                </label>
-                <input
-                  id="title"
-                  type="text"
-                  value={formData.title}
-                  onChange={e => setFormData({ ...formData, title: e.target.value })}
-                  className="input-field"
-                  required
-                  placeholder="Enter expense title"
-                />
+      {/* Expenses List */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {mockExpenses
+          .filter((exp) => filter === 'ALL' || exp.category === filter)
+          .map((expense) => {
+            const Icon = getCategoryIcon(expense.category);
+            const shareAmount = expense.amount / expense.splitAmong;
+            
+            return (
+              <div key={expense.id} className="card hover:shadow-2xl transition-all duration-300">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className={`p-3 bg-gradient-to-br ${getCategoryColor(expense.category)} rounded-xl`}>
+                      <Icon className={`h-6 w-6 ${getCategoryIconColor(expense.category)}`} />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white">{expense.title}</h3>
+                      <span className={`badge badge-${expense.status === 'PAID' ? 'success' : expense.status === 'PENDING' ? 'warning' : 'danger'} mt-1`}>
+                        {expense.status}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-white">${expense.amount.toFixed(2)}</p>
+                    <p className="text-xs text-gray-400">Total</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2 bg-slate-800/30 rounded-xl p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-400">Paid by</span>
+                    <span className="text-sm text-white font-medium">{expense.paidBy}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-400">Split among</span>
+                    <span className="text-sm text-white font-medium">{expense.splitAmong} people</span>
+                  </div>
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-700/50">
+                    <span className="text-sm text-gray-400">Your share</span>
+                    <span className="text-lg text-purple-400 font-bold">${shareAmount.toFixed(2)}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-700/50">
+                  <div className="flex items-center space-x-2 text-sm text-gray-400">
+                    <Calendar className="h-4 w-4" />
+                    <span>{new Date(expense.date).toLocaleDateString()}</span>
+                  </div>
+                  <span className="text-xs px-3 py-1 bg-slate-800/50 rounded-full text-gray-400">
+                    {expense.category}
+                  </span>
+                </div>
               </div>
-              <div>
-                <label htmlFor="description" className="form-label">
-                  Description
-                </label>
-                <textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={e => setFormData({ ...formData, description: e.target.value })}
-                  className="input-field"
-                  rows={3}
-                  placeholder="Enter expense description"
-                />
-              </div>
-              <div>
-                <label htmlFor="amount" className="form-label">
-                  Amount
-                </label>
-                <input
-                  id="amount"
-                  type="number"
-                  step="0.01"
-                  value={formData.amount}
-                  onChange={e =>
-                    setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })
-                  }
-                  className="input-field"
-                  required
-                  placeholder="0.00"
-                />
-              </div>
-              <div>
-                <label htmlFor="category" className="form-label">
-                  Category
-                </label>
-                <select
-                  id="category"
-                  value={formData.category}
-                  onChange={e =>
-                    setFormData({ ...formData, category: e.target.value as AppExpenseCategory })
-                  }
-                  className="select-field"
-                >
-                  {categories.map(category => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="paidBy" className="form-label">
-                  Paid By
-                </label>
-                <input
-                  id="paidBy"
-                  type="text"
-                  value={formData.paidBy}
-                  onChange={e => setFormData({ ...formData, paidBy: e.target.value })}
-                  className="input-field"
-                  required
-                  placeholder="Enter payer name"
-                />
-              </div>
-              <div>
-                <label htmlFor="dueDate" className="form-label">
-                  Due Date
-                </label>
-                <input
-                  id="dueDate"
-                  type="date"
-                  value={formData.date}
-                  onChange={e => setFormData({ ...formData, date: e.target.value })}
-                  className="input-field"
-                  required
-                />
-              </div>
-              <div className="flex space-x-3 pt-4">
-                <button type="submit" className="btn-primary flex-1">
-                  {editingExpense ? 'Update' : 'Create'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowCreateModal(false);
-                    setEditingExpense(null);
-                  }}
-                  className="btn-outline flex-1"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
+            );
+          })}
+      </div>
+
+      {/* Summary Card */}
+      <div className="card glow-blue">
+        <h2 className="text-2xl font-bold text-gradient-heading mb-6">Monthly Summary</h2>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="text-center p-4 bg-slate-800/30 rounded-xl">
+            <DollarSign className="h-8 w-8 text-emerald-400 mx-auto mb-2" />
+            <p className="text-2xl font-bold text-white">${totalExpenses.toFixed(2)}</p>
+            <p className="text-sm text-gray-400 mt-1">Total Expenses</p>
+          </div>
+          <div className="text-center p-4 bg-slate-800/30 rounded-xl">
+            <TrendingDown className="h-8 w-8 text-blue-400 mx-auto mb-2" />
+            <p className="text-2xl font-bold text-white">${yourShare.toFixed(2)}</p>
+            <p className="text-sm text-gray-400 mt-1">Your Share</p>
+          </div>
+          <div className="text-center p-4 bg-slate-800/30 rounded-xl">
+            <ShoppingCart className="h-8 w-8 text-purple-400 mx-auto mb-2" />
+            <p className="text-2xl font-bold text-white">{mockExpenses.length}</p>
+            <p className="text-sm text-gray-400 mt-1">Transactions</p>
+          </div>
+          <div className="text-center p-4 bg-slate-800/30 rounded-xl">
+            <Calendar className="h-8 w-8 text-pink-400 mx-auto mb-2" />
+            <p className="text-2xl font-bold text-white">October</p>
+            <p className="text-sm text-gray-400 mt-1">Current Period</p>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

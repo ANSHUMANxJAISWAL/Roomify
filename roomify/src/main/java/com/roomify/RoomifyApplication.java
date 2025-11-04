@@ -2,20 +2,11 @@ package com.roomify;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
-@SpringBootApplication(scanBasePackages = {"com.roomify", "com.roomify.database"}, exclude = {
-    org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
-    org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration.class
-})
-@EnableCaching
-@EnableAsync
-@EnableScheduling
+@SpringBootApplication
+@ComponentScan(basePackages = "com.roomify")
 public class RoomifyApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(RoomifyApplication.class, args);
     }
