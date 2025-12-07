@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DollarSign, ShoppingCart, Utensils, Home, Car, Film, Plus, TrendingUp, TrendingDown, Calendar } from 'lucide-react';
+import AddExpenseModal from '../components/ui/AddExpenseModal';
 
 interface Expense {
   id: string;
@@ -14,49 +15,59 @@ interface Expense {
 
 const Expenses: React.FC = () => {
   const [filter, setFilter] = useState<string>('ALL');
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
 
-  const mockExpenses: Expense[] = [
-    {
-      id: '1',
-      title: 'Grocery Shopping',
-      amount: 156.50,
-      category: 'GROCERIES',
-      paidBy: 'John Doe',
-      splitAmong: 4,
-      date: '2024-10-28',
-      status: 'PAID',
-    },
-    {
-      id: '2',
-      title: 'Monthly Rent',
-      amount: 2400.00,
-      category: 'RENT',
-      paidBy: 'Jane Smith',
-      splitAmong: 4,
-      date: '2024-10-01',
-      status: 'PAID',
-    },
-    {
-      id: '3',
-      title: 'Electricity Bill',
-      amount: 89.30,
-      category: 'UTILITIES',
-      paidBy: 'Admin User',
-      splitAmong: 4,
-      date: '2024-10-25',
-      status: 'PENDING',
-    },
-    {
-      id: '4',
-      title: 'Movie Night',
-      amount: 52.00,
-      category: 'ENTERTAINMENT',
-      paidBy: 'Guest User',
-      splitAmong: 3,
-      date: '2024-10-26',
-      status: 'PAID',
-    },
-  ];
+  const handleAddExpense = () => {
+    setShowAddModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowAddModal(false);
+  };
+
+  const handleExpenseAdded = () => {
+    fetchExpenses();
+  };
+
+  const fetchExpenses = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:8080/api/expenses');
+      if (!response.ok) {
+        throw new Error('Failed to fetch expenses');
+      }
+      const data = await response.json();
+      
+      // Transform backend data to match frontend interface
+      const transformedExpenses: Expense[] = data.map((exp: any) => ({
+        id: exp.id,
+        title: exp.title,
+        amount: exp.amount,
+        category: exp.category,
+        paidBy: `${exp.paidBy.firstName} ${exp.paidBy.lastName || ''}`,
+        splitAmong: exp.splits?.length || 1,
+        date: exp.date,
+        status: exp.status,
+      }));
+      
+      setExpenses(transformedExpenses);
+    } catch (error) {
+      console.error('Error fetching expenses:', error);
+      // Keep using mock data if API fails
+      setExpenses(mockExpenses);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchExpenses();
+  }, []);
+
+  const mockExpenses: Expense[] = [];
+  // Removed mock data - will use real data from API
 
   const getCategoryIcon = (category: string) => {
     const icons: { [key: string]: any } = {
@@ -94,8 +105,16 @@ const Expenses: React.FC = () => {
     return colors[category] || 'text-gray-400';
   };
 
-  const totalExpenses = mockExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-  const yourShare = mockExpenses.reduce((sum, exp) => sum + (exp.amount / exp.splitAmong), 0);
+  const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+  const yourShare = expenses.reduce((sum, exp) => sum + (exp.amount / exp.splitAmong), 0);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -107,7 +126,7 @@ const Expenses: React.FC = () => {
               <h1 className="text-4xl font-bold text-gradient-heading mb-2">Expenses</h1>
               <p className="text-gray-400">Track and manage shared expenses</p>
             </div>
-            <button className="btn-primary">
+            <button onClick={handleAddExpense} className="btn-primary">
               <Plus className="h-5 w-5 mr-2" />
               Add Expense
             </button>
@@ -145,7 +164,20 @@ const Expenses: React.FC = () => {
 
       {/* Expenses List */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {mockExpenses
+        {expenses.length === 0 ? (
+          <div className="col-span-2 card text-center py-12">
+            <ShoppingCart className="h-24 w-24 text-gray-400 mx-auto mb-4 opacity-50" />
+            <h3 className="text-xl font-medium text-gray-200 mb-2">No expenses found</h3>
+            <p className="text-gray-400 mb-6">
+              {filter !== 'ALL' ? `No ${filter.toLowerCase()} expenses` : 'Add your first expense to get started'}
+            </p>
+            <button onClick={handleAddExpense} className="btn-primary mx-auto">
+              <Plus className="h-5 w-5 mr-2" />
+              Add Expense
+            </button>
+          </div>
+        ) : (
+          expenses
           .filter((exp) => filter === 'ALL' || exp.category === filter)
           .map((expense) => {
             const Icon = getCategoryIcon(expense.category);
@@ -197,7 +229,8 @@ const Expenses: React.FC = () => {
                 </div>
               </div>
             );
-          })}
+          })
+        )}
       </div>
 
       {/* Summary Card */}
@@ -216,7 +249,7 @@ const Expenses: React.FC = () => {
           </div>
           <div className="text-center p-4 bg-slate-800/30 rounded-xl">
             <ShoppingCart className="h-8 w-8 text-purple-400 mx-auto mb-2" />
-            <p className="text-2xl font-bold text-white">{mockExpenses.length}</p>
+            <p className="text-2xl font-bold text-white">{expenses.length}</p>
             <p className="text-sm text-gray-400 mt-1">Transactions</p>
           </div>
           <div className="text-center p-4 bg-slate-800/30 rounded-xl">
@@ -226,6 +259,13 @@ const Expenses: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Add Expense Modal */}
+      <AddExpenseModal 
+        isOpen={showAddModal} 
+        onClose={handleCloseModal}
+        onExpenseAdded={handleExpenseAdded}
+      />
     </div>
   );
 };

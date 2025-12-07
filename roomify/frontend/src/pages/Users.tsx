@@ -87,6 +87,11 @@ const Users: React.FC = () => {
     // TODO: Open edit modal with user data
   };
 
+  const handleAddUser = () => {
+    alert('Add User functionality coming soon!');
+    // TODO: Open create user modal
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchUsers(searchQuery);
@@ -131,7 +136,7 @@ const Users: React.FC = () => {
               <RefreshCw className={`h-5 w-5 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
               Refresh
             </button>
-            <button className="btn-primary">
+            <button onClick={handleAddUser} className="btn-primary">
               <UserPlus className="h-5 w-5 mr-2" />
               Add User
             </button>

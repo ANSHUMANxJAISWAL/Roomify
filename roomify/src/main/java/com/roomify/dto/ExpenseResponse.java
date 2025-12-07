@@ -1,7 +1,5 @@
 package com.roomify.dto;
 
-import com.roomify.database.enums.ExpenseCategory;
-import com.roomify.database.enums.ExpenseStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,8 +21,8 @@ public class ExpenseResponse {
     public BigDecimal amount;
     public String currency;
     public LocalDate date;
-    public ExpenseCategory category;
-    public ExpenseStatus status;
+    public String category;
+    public String status;
     public UserDto paidBy;
     public HouseholdResponse household;
     public String receiptUrl;

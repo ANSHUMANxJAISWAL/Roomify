@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/households")
+@RequestMapping("/api/households")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class HouseholdController {

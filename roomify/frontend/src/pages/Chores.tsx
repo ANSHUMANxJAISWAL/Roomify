@@ -62,6 +62,11 @@ const Chores: React.FC = () => {
     },
   ]);
 
+  const handleCreateChore = () => {
+    alert('Create Chore functionality coming soon!');
+    // TODO: Open create chore modal
+  };
+
   const handleMarkComplete = (choreId: string) => {
     setChores(prevChores =>
       prevChores.map(chore =>
@@ -130,7 +135,7 @@ const Chores: React.FC = () => {
             <h1 className="text-4xl font-bold text-gradient-heading mb-2">Chores Management</h1>
             <p className="text-gray-400">Track and assign household chores</p>
           </div>
-          <button className="btn-primary">
+          <button onClick={handleCreateChore} className="btn-primary">
             <Plus className="h-5 w-5 mr-2" />
             Create Chore
           </button>

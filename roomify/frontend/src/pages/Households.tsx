@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Home, Users, MapPin, Calendar, Plus, Search, Edit2, Trash2, UserPlus } from 'lucide-react';
+import AddHouseholdModal from '../components/ui/AddHouseholdModal';
 
 interface Household {
   id: string;
@@ -16,48 +17,95 @@ interface Household {
 const Households: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [households, setHouseholds] = useState<Household[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const mockHouseholds: Household[] = [
-    {
-      id: '1',
-      name: 'Downtown Apartment',
-      description: 'Cozy apartment in the heart of the city',
-      address: '123 Main St, New York, NY 10001',
-      memberCount: 4,
-      maxMembers: 6,
-      status: 'ACTIVE',
-      createdAt: '2024-01-15',
-      inviteCode: 'DTN-2024',
-    },
-    {
-      id: '2',
-      name: 'Sunset Villa',
-      description: 'Beautiful villa with amazing sunset views',
-      address: '456 Beach Blvd, Los Angeles, CA 90001',
-      memberCount: 3,
-      maxMembers: 5,
-      status: 'ACTIVE',
-      createdAt: '2024-02-20',
-      inviteCode: 'SNT-2024',
-    },
-    {
-      id: '3',
-      name: 'Campus Housing',
-      description: 'Student housing near university campus',
-      address: '789 College Ave, Boston, MA 02101',
-      memberCount: 5,
-      maxMembers: 8,
-      status: 'ACTIVE',
-      createdAt: '2024-01-10',
-      inviteCode: 'CMP-2024',
-    },
-  ];
+  const fetchHouseholds = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:8080/api/households');
+      if (!response.ok) {
+        throw new Error('Failed to fetch households');
+      }
+      const data = await response.json();
+      
+      // Transform backend data to match frontend interface
+      const transformedHouseholds: Household[] = data.map((h: any) => ({
+        id: h.id,
+        name: h.name,
+        description: h.description || '',
+        address: h.address ? `${h.address.street || ''}, ${h.address.city || ''}, ${h.address.state || ''} ${h.address.zipCode || ''}`.trim() : 'No address provided',
+        memberCount: 0, // Will be updated when member functionality is implemented
+        maxMembers: h.maxMembers,
+        status: h.status,
+        createdAt: h.createdAt,
+        inviteCode: h.inviteCode,
+      }));
+      
+      setHouseholds(transformedHouseholds);
+    } catch (error) {
+      console.error('Error fetching households:', error);
+      setHouseholds([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const filteredHouseholds = mockHouseholds.filter(
+  useEffect(() => {
+    fetchHouseholds();
+  }, []);
+
+  const handleHouseholdAdded = () => {
+    fetchHouseholds();
+  };
+
+  const handleCloseModal = () => {
+    setShowCreateModal(false);
+  };
+
+  const handleInvite = (householdId: string, householdName: string) => {
+    alert(`Invite functionality for ${householdName} coming soon!`);
+    // TODO: Open invite modal
+  };
+
+  const handleEdit = (householdId: string, householdName: string) => {
+    alert(`Edit functionality for ${householdName} coming soon!`);
+    // TODO: Open edit modal
+  };
+
+  const handleDelete = async (householdId: string, householdName: string) => {
+    if (window.confirm(`Are you sure you want to delete ${householdName}?`)) {
+      try {
+        const response = await fetch(`http://localhost:8080/api/households/${householdId}`, {
+          method: 'DELETE',
+        });
+        
+        if (response.ok) {
+          alert('Household deleted successfully!');
+          fetchHouseholds();
+        } else {
+          alert('Failed to delete household');
+        }
+      } catch (error) {
+        console.error('Error deleting household:', error);
+        alert('Error deleting household. Please try again.');
+      }
+    }
+  };
+
+  const filteredHouseholds = households.filter(
     (household) =>
       household.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       household.address.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -175,14 +223,25 @@ const Households: React.FC = () => {
 
               {/* Actions */}
               <div className="flex items-center space-x-2 pt-4 border-t border-slate-700/50">
-                <button className="flex-1 btn-secondary text-sm py-2">
+                <button 
+                  onClick={() => handleInvite(household.id, household.name)}
+                  className="flex-1 btn-secondary text-sm py-2"
+                >
                   <UserPlus className="h-4 w-4 mr-2" />
                   Invite
                 </button>
-                <button className="btn-outline text-sm py-2 px-3" aria-label="Edit household">
+                <button 
+                  onClick={() => handleEdit(household.id, household.name)}
+                  className="btn-outline text-sm py-2 px-3" 
+                  aria-label="Edit household"
+                >
                   <Edit2 className="h-4 w-4" />
                 </button>
-                <button className="btn-outline text-sm py-2 px-3 hover:bg-red-500/10 hover:border-red-500/30" aria-label="Delete household">
+                <button 
+                  onClick={() => handleDelete(household.id, household.name)}
+                  className="btn-outline text-sm py-2 px-3 hover:bg-red-500/10 hover:border-red-500/30" 
+                  aria-label="Delete household"
+                >
                   <Trash2 className="h-4 w-4 text-red-400" />
                 </button>
               </div>
@@ -190,6 +249,13 @@ const Households: React.FC = () => {
           ))}
         </div>
       )}
+
+      {/* Add Household Modal */}
+      <AddHouseholdModal 
+        isOpen={showCreateModal} 
+        onClose={handleCloseModal}
+        onHouseholdAdded={handleHouseholdAdded}
+      />
     </div>
   );
 };

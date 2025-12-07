@@ -32,13 +32,11 @@ export default defineConfig(({ mode }) => {
             // Vendor chunks
             'vendor-react': ['react', 'react-dom'],
             'vendor-router': ['react-router-dom'],
-            'vendor-ui': ['framer-motion', 'lucide-react', 'sonner'],
-            'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
-            'vendor-charts': ['recharts'],
+            'vendor-ui': ['lucide-react'],
             // Supabase and auth
-            'vendor-supabase': ['@supabase/supabase-js', '@supabase/auth-helpers-react'],
+            'vendor-supabase': ['@supabase/supabase-js'],
             // Utilities
-            'vendor-utils': ['axios', 'clsx', 'date-fns', 'tailwind-merge'],
+            'vendor-utils': ['axios'],
           },
         },
       },

@@ -12,23 +12,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AddressDto {
-    @NotBlank
     @Size(max = 255)
-    private String street;
+    public String street;
 
-    @NotBlank
     @Size(max = 100)
-    private String city;
+    public String city;
 
-    @NotBlank
     @Size(max = 100)
-    private String state;
+    public String state;
 
-    @NotBlank
     @Size(max = 20)
-    private String zipCode;
+    public String zipCode;
 
-    @NotBlank
     @Size(max = 100)
-    private String country;
+    public String country;
 }
